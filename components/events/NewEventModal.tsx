@@ -15,6 +15,7 @@ interface Props {
   onClose: () => void
   onCreated: () => void
   defaultClientId?: string
+  initialDate?: string // YYYY-MM-DD, pre-fills start/end date
 }
 
 const EVENT_TYPES = [
@@ -62,7 +63,7 @@ const inputStyle: React.CSSProperties = {
   outline: 'none',
 }
 
-export default function NewEventModal({ open, onClose, onCreated, defaultClientId }: Props) {
+export default function NewEventModal({ open, onClose, onCreated, defaultClientId, initialDate }: Props) {
   const [clients, setClients] = useState<Client[]>([])
   const [serverError, setServerError] = useState('')
 
@@ -118,12 +119,14 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
     onClose()
   }
 
-  // Helpers para datetime-local default values
   function nowPlus(hours: number) {
     const d = new Date()
     d.setHours(d.getHours() + hours, 0, 0, 0)
     return d.toISOString().slice(0, 16)
   }
+
+  const startDefault = initialDate ? `${initialDate}T18:00` : nowPlus(24)
+  const endDefault = initialDate ? `${initialDate}T22:00` : nowPlus(28)
 
   return (
     <div
@@ -180,7 +183,7 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
               <input
                 {...register('startDate')}
                 type="datetime-local"
-                defaultValue={nowPlus(24)}
+                defaultValue={startDefault}
                 style={{ ...inputStyle, colorScheme: 'dark' }}
               />
             </Field>
@@ -188,7 +191,7 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
               <input
                 {...register('endDate')}
                 type="datetime-local"
-                defaultValue={nowPlus(28)}
+                defaultValue={endDefault}
                 style={{ ...inputStyle, colorScheme: 'dark' }}
               />
             </Field>
