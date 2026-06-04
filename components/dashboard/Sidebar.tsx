@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 
 const NAV_MAIN = [
   { href: '/', icon: '⚡', label: 'Dashboard' },
-  { href: '/messages', icon: '💬', label: 'Mensajes', badge: '7', badgeVariant: 'red' },
+  { href: '/messages', icon: '💬', label: 'Mensajes', badge: '7', badgeVariant: 'red' as const },
   { href: '/events', icon: '📅', label: 'Eventos' },
   { href: '/clients', icon: '👥', label: 'Clientes' },
   { href: '/quotes', icon: '📄', label: 'Cotizaciones', badge: '3' },

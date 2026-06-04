@@ -274,13 +274,69 @@ model PublicPage {
 
 // ── ENUMS ─────────────────────────────────────────────────────────
 
-enum ArtistType    { dj band soloist mariachi agency }
-enum PlanType      { free starter pro agency_plan }
-enum Channel       { whatsapp instagram facebook }
-enum Direction     { inbound outbound }
-enum RespondedBy   { human ai }
-enum EventType     { wedding corporate birthday quinceanera club private other }
-enum EventStatus   { pending confirmed completed cancelled }
-enum QuoteStatus   { draft sent accepted rejected expired }
-enum AdPlatform    { facebook google }
-enum CampaignStatus { active paused ended }
+enum ArtistType {
+  dj
+  band
+  soloist
+  mariachi
+  agency
+}
+
+enum PlanType {
+  free
+  starter
+  pro
+  agency_plan
+}
+
+enum Channel {
+  whatsapp
+  instagram
+  facebook
+}
+
+enum Direction {
+  inbound
+  outbound
+}
+
+enum RespondedBy {
+  human
+  ai
+}
+
+enum EventType {
+  wedding
+  corporate
+  birthday
+  quinceanera
+  club
+  private
+  other
+}
+
+enum EventStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+enum QuoteStatus {
+  draft
+  sent
+  accepted
+  rejected
+  expired
+}
+
+enum AdPlatform {
+  facebook
+  google
+}
+
+enum CampaignStatus {
+  active
+  paused
+  ended
+}

@@ -32,6 +32,9 @@ yarn-error.log*
 .env.development
 .env.production
 
+# MCP config (contains tokens)
+.mcp.json
+
 # Prisma
 prisma/migrations/
 
