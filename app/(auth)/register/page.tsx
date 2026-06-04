@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 const ARTIST_TYPES = [
@@ -16,7 +15,6 @@ const ARTIST_TYPES = [
 type ArtistType = (typeof ARTIST_TYPES)[number]['value']
 
 export default function RegisterPage() {
-  const router = useRouter()
   const supabase = createClientComponentClient()
 
   const [artistType, setArtistType] = useState<ArtistType>('dj')

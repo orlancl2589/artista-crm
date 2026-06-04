@@ -4,8 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { Metadata } from 'next'
-
 export default function LoginPage() {
   const router = useRouter()
   const supabase = createClientComponentClient()

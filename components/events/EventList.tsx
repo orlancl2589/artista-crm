@@ -39,13 +39,6 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   cancelled: { label: 'Cancelado',   color: '#ef4444' },
 }
 
-function formatDateTime(iso: string) {
-  const d = new Date(iso)
-  return d.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
-    + ' · '
-    + d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
-}
-
 function StatusBadge({ status }: { status: string }) {
   const cfg = STATUS_CONFIG[status] ?? { label: status, color: 'var(--muted2)' }
   return (
@@ -95,16 +88,6 @@ export default function EventList() {
 
   useEffect(() => { fetchEvents() }, [fetchEvents])
   useEffect(() => { setPage(1) }, [status, upcoming])
-
-  // Stats de los eventos cargados
-  const stats = events.reduce(
-    (acc, e) => {
-      acc.revenue += Number(e.price ?? 0)
-      acc.collected += Number(e.paidAmount)
-      return acc
-    },
-    { revenue: 0, collected: 0 }
-  )
 
   return (
     <div className="flex flex-col gap-4 h-full">

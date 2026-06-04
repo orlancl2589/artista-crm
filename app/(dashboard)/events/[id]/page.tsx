@@ -10,9 +10,7 @@ interface Props {
   params: { id: string }
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  return { title: 'Evento — Artista CRM' }
-}
+export const metadata: Metadata = { title: 'Evento — Artista CRM' }
 
 export default async function EventDetailPage({ params }: Props) {
   const supabase = createServerComponentClient({ cookies })

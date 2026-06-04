@@ -8,9 +8,7 @@ import type { Metadata } from 'next'
 
 interface Props { params: { id: string } }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  return { title: 'Cotización — Artista CRM' }
-}
+export const metadata: Metadata = { title: 'Cotización — Artista CRM' }
 
 export default async function QuoteDetailPage({ params }: Props) {
   const supabase = createServerComponentClient({ cookies })
