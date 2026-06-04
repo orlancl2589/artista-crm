@@ -1,0 +1,286 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ── ARTISTAS ──────────────────────────────────────────────────────
+
+model Artist {
+  id                   String     @id @default(cuid())
+  userId               String     @unique
+  slug                 String     @unique
+  artistType           ArtistType @default(dj)
+  plan                 PlanType   @default(free)
+
+  // Info pública
+  name                 String
+  tagline              String?
+  bio                  String?
+  location             String?
+  coverageArea         String[]
+  basePrice            Decimal?   @db.Decimal(10, 2)
+  currency             String     @default("MXN")
+  experienceYears      Int?
+  rating               Decimal?   @db.Decimal(3, 2)
+
+  // Integraciones (tokens encriptados)
+  whatsappNumber       String?
+  whatsappToken        String?    // ENCRYPTED
+  metaPageId           String?
+  metaToken            String?    // ENCRYPTED
+  googleCalendarId     String?
+  googleRefreshToken   String?    // ENCRYPTED
+  spotifyRefreshToken  String?    // ENCRYPTED
+  soundcloudToken      String?    // ENCRYPTED
+  stripeCustomerId     String?
+  stripeSubId          String?
+
+  // Configuración del agente
+  agentEnabled         Boolean    @default(false)
+  agentPersona         String?
+  agentWelcomeMsg      String?
+  birthdayEngineOn     Boolean    @default(false)
+  birthdayDaysBefore   Int        @default(7)
+
+  // Página pública
+  pagePublished        Boolean    @default(false)
+  customDomain         String?    @unique
+  pageConfig           Json?
+
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  clients              Client[]
+  events               Event[]
+  quotes               Quote[]
+  messages             Message[]
+  members              BandMember[]
+  adCampaigns          AdCampaign[]
+
+  @@map("artists")
+}
+
+// ── CLIENTES DEL ARTISTA ──────────────────────────────────────────
+
+model Client {
+  id               String   @id @default(cuid())
+  artistId         String
+  artist           Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  name             String
+  phone            String   // ENCRYPTED — normalizado a E.164
+  email            String?
+  birthdate        DateTime?
+  preferredChannel Channel  @default(whatsapp)
+  tags             String[]
+  notes            String?
+  isActive         Boolean  @default(true)
+
+  totalSpent       Decimal  @default(0) @db.Decimal(10, 2)
+  totalEvents      Int      @default(0)
+  lastContact      DateTime?
+  birthdayOfferSentYear Int?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  events           Event[]
+  quotes           Quote[]
+  messages         Message[]
+
+  @@index([artistId])
+  @@index([artistId, birthdate])
+  @@map("clients")
+}
+
+// ── EVENTOS ───────────────────────────────────────────────────────
+
+model Event {
+  id            String      @id @default(cuid())
+  artistId      String
+  artist        Artist      @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  clientId      String?
+  client        Client?     @relation(fields: [clientId], references: [id])
+
+  title         String
+  eventType     EventType
+  status        EventStatus @default(pending)
+
+  startDate     DateTime
+  endDate       DateTime
+  timezone      String      @default("America/Mexico_City")
+
+  venue         String?
+  venueAddress  String?
+  city          String?
+
+  durationHours Decimal?    @db.Decimal(4, 2)
+  price         Decimal?    @db.Decimal(10, 2)
+  paidAmount    Decimal     @default(0) @db.Decimal(10, 2)
+  currency      String      @default("MXN")
+
+  rider         Json?
+  setlistNotes  String?
+  internalNotes String?
+
+  googleEventId String?
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  quotes        Quote[]
+
+  @@index([artistId])
+  @@index([artistId, startDate])
+  @@map("events")
+}
+
+// ── COTIZACIONES ──────────────────────────────────────────────────
+
+model Quote {
+  id             String      @id @default(cuid())
+  artistId       String
+  artist         Artist      @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  clientId       String?
+  client         Client?     @relation(fields: [clientId], references: [id])
+  eventId        String?
+  event          Event?      @relation(fields: [eventId], references: [id])
+
+  quoteNumber    String      @unique
+  status         QuoteStatus @default(draft)
+
+  lineItems      Json
+  subtotal       Decimal     @db.Decimal(10, 2)
+  tax            Decimal     @default(0) @db.Decimal(10, 2)
+  total          Decimal     @db.Decimal(10, 2)
+  currency       String      @default("MXN")
+
+  validUntil     DateTime?
+  notes          String?
+  pdfUrl         String?
+  signatureUrl   String?
+  signedAt       DateTime?
+
+  generatedByAI  Boolean     @default(false)
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([artistId])
+  @@map("quotes")
+}
+
+// ── MENSAJES ──────────────────────────────────────────────────────
+
+model Message {
+  id          String      @id @default(cuid())
+  artistId    String
+  artist      Artist      @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  clientId    String?
+  client      Client?     @relation(fields: [clientId], references: [id])
+
+  channel     Channel
+  externalId  String?
+  direction   Direction
+  content     String
+  mediaUrl    String?
+
+  respondedBy RespondedBy @default(human)
+  isRead      Boolean     @default(false)
+
+  metadata    Json?
+
+  createdAt   DateTime    @default(now())
+
+  @@index([artistId])
+  @@index([artistId, clientId])
+  @@index([artistId, isRead])
+  @@map("messages")
+}
+
+// ── MIEMBROS DE BANDA ─────────────────────────────────────────────
+
+model BandMember {
+  id              String   @id @default(cuid())
+  artistId        String
+  artist          Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  name            String
+  role            String
+  phone           String?  // ENCRYPTED
+  email           String?
+  splitPercentage Decimal? @db.Decimal(5, 2)
+  isActive        Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+
+  @@index([artistId])
+  @@map("band_members")
+}
+
+// ── CAMPAÑAS DE ADS ───────────────────────────────────────────────
+
+model AdCampaign {
+  id         String         @id @default(cuid())
+  artistId   String
+  artist     Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  platform   AdPlatform
+  externalId String?
+  name       String
+  status     CampaignStatus @default(active)
+
+  budget     Decimal        @db.Decimal(10, 2)
+  spent      Decimal        @default(0) @db.Decimal(10, 2)
+  leads      Int            @default(0)
+  reach      Int            @default(0)
+  clicks     Int            @default(0)
+
+  startDate  DateTime
+  endDate    DateTime?
+
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([artistId])
+  @@map("ad_campaigns")
+}
+
+// ── PÁGINAS PÚBLICAS ──────────────────────────────────────────────
+
+model PublicPage {
+  id          String   @id @default(cuid())
+  artistId    String   @unique
+  slug        String   @unique
+  isPublished Boolean  @default(false)
+  config      Json
+  seoTitle    String?
+  seoDesc     String?
+  seoKeywords String[]
+  customDomain String? @unique
+  views       Int      @default(0)
+  ctaClicks   Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("public_pages")
+}
+
+// ── ENUMS ─────────────────────────────────────────────────────────
+
+enum ArtistType    { dj band soloist mariachi agency }
+enum PlanType      { free starter pro agency_plan }
+enum Channel       { whatsapp instagram facebook }
+enum Direction     { inbound outbound }
+enum RespondedBy   { human ai }
+enum EventType     { wedding corporate birthday quinceanera club private other }
+enum EventStatus   { pending confirmed completed cancelled }
+enum QuoteStatus   { draft sent accepted rejected expired }
+enum AdPlatform    { facebook google }
+enum CampaignStatus { active paused ended }
