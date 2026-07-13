@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/utils/currency'
+import ConvertToEventModal from './ConvertToEventModal'
 
 interface LineItem {
   description: string
@@ -54,6 +55,7 @@ export default function QuoteDetail({ quote: initial }: { quote: Quote }) {
   const [quote, setQuote] = useState(initial)
   const [deleting, setDeleting] = useState(false)
   const [updating, setUpdating] = useState(false)
+  const [convertOpen, setConvertOpen] = useState(false)
 
   const cfg = STATUS_CONFIG[quote.status] ?? DEFAULT_STATUS_CFG
   const transitions = STATUS_TRANSITIONS[quote.status] ?? []
@@ -153,6 +155,16 @@ export default function QuoteDetail({ quote: initial }: { quote: Quote }) {
 
           {/* Acciones */}
           <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+            {/* Convertir en evento — solo si aceptada y sin evento vinculado */}
+            {quote.status === 'accepted' && !quote.event && (
+              <button
+                onClick={() => setConvertOpen(true)}
+                className="px-3 py-[7px] rounded-[var(--radius)] text-[12px] font-bold transition-colors"
+                style={{ background: 'var(--accent)', color: 'var(--bg)' }}
+              >
+                📅 Convertir en Evento
+              </button>
+            )}
             {transitions.map(t => (
               <button
                 key={t.next}
@@ -298,6 +310,16 @@ export default function QuoteDetail({ quote: initial }: { quote: Quote }) {
           </p>
         </div>
       )}
+
+      <ConvertToEventModal
+        open={convertOpen}
+        onClose={() => setConvertOpen(false)}
+        quoteId={quote.id}
+        quoteTotal={quote.total}
+        quoteCurrency={quote.currency}
+        clientId={quote.client?.id ?? null}
+        clientName={quote.client?.name ?? null}
+      />
     </div>
   )
 }
