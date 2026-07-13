@@ -276,6 +276,12 @@ export default function RegisterPage() {
           Iniciar sesión
         </Link>
       </p>
+      <p className="text-center mt-3 text-[11px]" style={{ color: 'var(--muted)' }}>
+        Al registrarte aceptas nuestros{' '}
+        <Link href="/terms" className="hover:underline">Términos</Link>
+        {' y '}
+        <Link href="/privacy" className="hover:underline">Política de Privacidad</Link>
+      </p>
     </div>
   )
 }

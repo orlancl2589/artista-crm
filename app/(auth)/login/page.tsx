@@ -166,13 +166,14 @@ export default function LoginPage() {
       {/* Register link */}
       <p className="text-center mt-5 text-[13px]" style={{ color: 'var(--muted2)' }}>
         ¿No tienes cuenta?{' '}
-        <Link
-          href="/register"
-          className="font-semibold transition-colors"
-          style={{ color: 'var(--accent)' }}
-        >
+        <Link href="/register" className="font-semibold" style={{ color: 'var(--accent)' }}>
           Regístrate gratis
         </Link>
+      </p>
+      <p className="text-center mt-3 text-[11px]" style={{ color: 'var(--muted)' }}>
+        <Link href="/terms" className="hover:underline">Términos</Link>
+        {' · '}
+        <Link href="/privacy" className="hover:underline">Privacidad</Link>
       </p>
     </div>
   )
