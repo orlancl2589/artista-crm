@@ -82,10 +82,10 @@ function NavItem({
   )
 }
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: { onClose?: () => void }) {
   return (
     <aside
-      className="w-[220px] min-w-[220px] flex flex-col relative z-10"
+      className="w-[220px] min-w-[220px] h-full flex flex-col relative z-10"
       style={{ background: 'var(--bg2)', borderRight: '1px solid var(--border)' }}
     >
       {/* Logo */}
@@ -99,7 +99,7 @@ export default function Sidebar() {
         >
           🎵
         </div>
-        <div>
+        <div className="flex-1">
           <div className="text-[15px] font-extrabold tracking-[-0.3px] leading-tight" style={{ color: 'var(--text)' }}>
             Artista CRM
           </div>
@@ -107,6 +107,16 @@ export default function Sidebar() {
             v1.0 · beta
           </div>
         </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-[14px] flex-shrink-0"
+            style={{ color: 'var(--muted2)' }}
+            aria-label="Cerrar menú"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Nav principal */}

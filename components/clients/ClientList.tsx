@@ -145,7 +145,7 @@ export default function ClientList() {
 
       {/* Table */}
       <div
-        className="flex-1 rounded-xl overflow-hidden"
+        className="flex-1 rounded-xl overflow-x-auto"
         style={{ border: '1px solid var(--border)', background: 'var(--bg2)' }}
       >
         {loading ? (

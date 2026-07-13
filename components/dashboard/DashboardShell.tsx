@@ -115,14 +115,14 @@ export default function DashboardShell({ artistName, stats, upcomingEvents, rece
   })
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <p className="font-mono text-[11px] capitalize mb-1" style={{ color: 'var(--muted2)' }}>
             {today}
           </p>
-          <h1 className="text-[24px] font-extrabold tracking-[-0.5px]" style={{ color: 'var(--text)' }}>
+          <h1 className="text-[20px] sm:text-[24px] font-extrabold tracking-[-0.5px]" style={{ color: 'var(--text)' }}>
             {greeting()}, {artistName}
           </h1>
           {stats.upcomingCount > 0 && (
@@ -135,17 +135,17 @@ export default function DashboardShell({ artistName, stats, upcomingEvents, rece
             </p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <button
             onClick={() => setShowEventModal(true)}
-            className="px-4 py-[9px] rounded-[var(--radius)] text-[13px] font-medium transition-colors"
+            className="px-3 sm:px-4 py-[9px] rounded-[var(--radius)] text-[13px] font-medium transition-colors"
             style={{ background: 'var(--bg3)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             + Evento
           </button>
           <button
             onClick={() => setShowClientModal(true)}
-            className="px-4 py-[9px] rounded-[var(--radius)] text-[13px] font-bold hover:opacity-90 transition-opacity"
+            className="px-3 sm:px-4 py-[9px] rounded-[var(--radius)] text-[13px] font-bold hover:opacity-90 transition-opacity"
             style={{ background: 'var(--accent)', color: 'var(--bg)' }}
           >
             + Cliente
@@ -170,7 +170,7 @@ export default function DashboardShell({ artistName, stats, upcomingEvents, rece
               Completa estos pasos para sacarle todo el provecho al CRM
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               { done: true,            icon: '✓', label: 'Crear tu cuenta',           href: null },
               { done: profileComplete, icon: '2', label: 'Completar tu perfil',       href: '/profile' },
@@ -207,7 +207,7 @@ export default function DashboardShell({ artistName, stats, upcomingEvents, rece
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           label="Ingresos este mes"
           value={formatCurrency(stats.revenueThisMonth)}
@@ -248,7 +248,7 @@ export default function DashboardShell({ artistName, stats, upcomingEvents, rece
       </div>
 
       {/* Main grid */}
-      <div className="grid grid-cols-[1fr_360px] gap-4 flex-1">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4 flex-1">
         {/* Próximos eventos */}
         <div
           className="rounded-xl flex flex-col"

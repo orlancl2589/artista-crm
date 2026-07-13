@@ -149,7 +149,7 @@ export default function ProfileForm({ artist }: { artist: Artist }) {
       <form onSubmit={handleSave} className="rounded-xl p-6 flex flex-col gap-4" style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}>
         <h2 className="text-[14px] font-bold" style={{ color: 'var(--text)' }}>Información general</h2>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-[11px] font-medium" style={{ color: 'var(--muted2)' }}>Nombre artístico *</label>
             <input value={form.name} onChange={e => set('name', e.target.value)} required style={inputStyle} />
@@ -180,7 +180,7 @@ export default function ProfileForm({ artist }: { artist: Artist }) {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-[11px] font-medium" style={{ color: 'var(--muted2)' }}>Ciudad / Ubicación</label>
             <input value={form.location} onChange={e => set('location', e.target.value)} placeholder="Ciudad de México" style={inputStyle} />
@@ -191,7 +191,7 @@ export default function ProfileForm({ artist }: { artist: Artist }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 items-end">
           <div className="flex flex-col gap-1">
             <label className="text-[11px] font-medium" style={{ color: 'var(--muted2)' }}>Precio base</label>
             <input value={form.basePrice} onChange={e => set('basePrice', e.target.value)} type="number" min="0" step="500" placeholder="15000" style={inputStyle} />

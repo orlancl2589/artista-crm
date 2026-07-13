@@ -119,7 +119,7 @@ export default function QuoteList() {
 
       {/* Tabla */}
       <div
-        className="rounded-xl overflow-hidden flex-1"
+        className="rounded-xl overflow-x-auto flex-1"
         style={{ border: '1px solid var(--border)', background: 'var(--bg2)' }}
       >
         {loading ? (
