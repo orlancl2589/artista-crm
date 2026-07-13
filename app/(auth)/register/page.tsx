@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 const ARTIST_TYPES = [
@@ -16,6 +17,7 @@ type ArtistType = (typeof ARTIST_TYPES)[number]['value']
 
 export default function RegisterPage() {
   const supabase = createClientComponentClient()
+  const router = useRouter()
 
   const [artistType, setArtistType] = useState<ArtistType>('dj')
   const [name, setName] = useState('')
@@ -30,7 +32,7 @@ export default function RegisterPage() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -42,6 +44,12 @@ export default function RegisterPage() {
     if (error) {
       setError(error.message)
       setLoading(false)
+      return
+    }
+
+    // Si email confirmation está desactivado, Supabase devuelve sesión inmediatamente
+    if (data.session) {
+      router.push('/dashboard')
       return
     }
 

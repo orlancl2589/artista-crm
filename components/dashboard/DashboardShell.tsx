@@ -41,6 +41,8 @@ interface Props {
   stats: Stats
   upcomingEvents: UpcomingEvent[]
   recentClients: RecentClient[]
+  isNewUser: boolean
+  profileComplete: boolean
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
@@ -100,7 +102,7 @@ function StatCard({
   )
 }
 
-export default function DashboardShell({ artistName, stats, upcomingEvents, recentClients }: Props) {
+export default function DashboardShell({ artistName, stats, upcomingEvents, recentClients, isNewUser, profileComplete }: Props) {
   const router = useRouter()
   const [showClientModal, setShowClientModal] = useState(false)
   const [showEventModal, setShowEventModal] = useState(false)
@@ -150,6 +152,59 @@ export default function DashboardShell({ artistName, stats, upcomingEvents, rece
           </button>
         </div>
       </div>
+
+      {/* Onboarding banner — solo para usuarios nuevos */}
+      {isNewUser && (
+        <div
+          className="rounded-xl p-5 flex flex-col gap-4"
+          style={{ background: 'var(--bg2)', border: '1px solid var(--accent)30' }}
+        >
+          <div>
+            <div
+              className="inline-block text-[10px] font-bold uppercase tracking-[1.5px] px-2 py-1 rounded-full mb-2"
+              style={{ background: 'var(--accent)15', color: 'var(--accent)' }}
+            >
+              Primeros pasos
+            </div>
+            <p className="text-[13px]" style={{ color: 'var(--muted2)' }}>
+              Completa estos pasos para sacarle todo el provecho al CRM
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { done: true,            icon: '✓', label: 'Crear tu cuenta',           href: null },
+              { done: profileComplete, icon: '2', label: 'Completar tu perfil',       href: '/profile' },
+              { done: stats.activeClients > 0, icon: '3', label: 'Agregar tu primer cliente', href: null, action: () => setShowClientModal(true) },
+            ].map((step) => (
+              <div
+                key={step.label}
+                onClick={() => step.href ? router.push(step.href) : step.action?.()}
+                className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors"
+                style={{
+                  background: step.done ? 'rgba(34,197,94,0.08)' : 'var(--bg3)',
+                  border: `1px solid ${step.done ? 'rgba(34,197,94,0.3)' : 'var(--border)'}`,
+                  opacity: step.done ? 0.7 : 1,
+                }}
+                onMouseEnter={e => { if (!step.done) e.currentTarget.style.borderColor = 'var(--accent)' }}
+                onMouseLeave={e => { if (!step.done) e.currentTarget.style.borderColor = 'var(--border)' }}
+              >
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold flex-shrink-0"
+                  style={{
+                    background: step.done ? 'rgba(34,197,94,0.2)' : 'var(--bg4)',
+                    color: step.done ? '#22c55e' : 'var(--muted2)',
+                  }}
+                >
+                  {step.done ? '✓' : step.icon}
+                </div>
+                <span className="text-[12px] font-medium" style={{ color: step.done ? 'var(--muted2)' : 'var(--text)' }}>
+                  {step.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3">

@@ -112,9 +112,14 @@ export default async function DashboardPage() {
     (sum, e) => sum + Number(e.price ?? 0), 0
   )
 
+  const isNewUser = activeClients === 0 && upcomingEvents.length === 0 && eventsThisMonth.length === 0
+  const profileComplete = !!(artist.tagline && artist.location)
+
   return (
     <DashboardShell
       artistName={artist.name}
+      isNewUser={isNewUser}
+      profileComplete={profileComplete}
       stats={{
         revenueThisMonth,
         revenueLastMonth,
