@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server'
-import { requireArtist } from '@/lib/auth/require-artist'
+import { requireArtist, requireArtistWithEmail } from '@/lib/auth/require-artist'
 import { prisma } from '@/lib/db/prisma'
 import { withRateLimit, rateLimiters } from '@/lib/security/rate-limit'
 import { handleApiError, ApiError } from '@/lib/utils/api-error'
 import { UpdateQuoteSchema } from '@/lib/validations/quote.schema'
+import { sendQuoteNotification } from '@/lib/email/send-quote-notification'
 import type { Prisma } from '@prisma/client'
 
 async function getOwnedQuote(quoteId: string, artistId: string) {
@@ -54,7 +55,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const limited = await withRateLimit(req, rateLimiters.api)
     if (limited) return limited
 
-    const artist = await requireArtist()
+    const { artist, email: artistEmail } = await requireArtistWithEmail()
     const existing = await getOwnedQuote(params.id, artist.id)
 
     // No permitir editar cotizaciones aceptadas o firmadas
@@ -100,6 +101,21 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         event: { select: { id: true, title: true } },
       },
     })
+
+    // Email de notificación cuando cambia el status (fire-and-forget)
+    const newStatus = parsed.data.status
+    if (newStatus && newStatus !== existing.status && artistEmail) {
+      sendQuoteNotification({
+        toEmail: artistEmail,
+        toName: artist.name,
+        quoteId: updated.id,
+        quoteNumber: updated.quoteNumber,
+        clientName: updated.client?.name ?? null,
+        total: updated.total.toString(),
+        currency: updated.currency,
+        newStatus,
+      })
+    }
 
     return Response.json({
       data: {

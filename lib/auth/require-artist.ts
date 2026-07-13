@@ -17,3 +17,17 @@ export async function requireArtist(): Promise<Artist> {
 
   return artist
 }
+
+export async function requireArtistWithEmail(): Promise<{ artist: Artist; email: string }> {
+  const supabase = createRouteHandlerClient({ cookies })
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) throw new ApiError('No autenticado', 401)
+
+  const artist = await getArtistFromSession(user.id)
+  if (!artist) throw new ApiError('Perfil de artista no encontrado', 404)
+
+  return { artist, email: user.email ?? '' }
+}
