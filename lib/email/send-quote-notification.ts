@@ -21,7 +21,7 @@ const SUBJECT: Record<string, string> = {
 }
 
 export async function sendQuoteNotification(params: QuoteNotificationParams) {
-  const { toEmail, toName, newStatus, quoteNumber, clientName, total, currency, quoteId } = params
+  const { toEmail, newStatus, quoteNumber, clientName, total, currency, quoteId } = params
 
   const subject = SUBJECT[newStatus]
   if (!subject) return  // Solo enviamos para estos tres estados
