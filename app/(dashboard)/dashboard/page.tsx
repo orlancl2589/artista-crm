@@ -40,7 +40,7 @@ export default async function DashboardPage() {
         startDate: { gte: monthStart, lt: monthEnd },
         status: { in: ['confirmed', 'completed'] },
       },
-      select: { price: true },
+      select: { price: true, startDate: true },
     }),
 
     // Eventos mes anterior
@@ -128,6 +128,7 @@ export default async function DashboardPage() {
         activeClients,
         upcomingCount,
       }}
+      calendarEvents={eventsThisMonth.map((e) => e.startDate.toISOString())}
       upcomingEvents={upcomingEvents.map((e) => ({
         ...e,
         startDate: e.startDate.toISOString(),

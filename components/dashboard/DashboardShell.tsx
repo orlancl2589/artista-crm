@@ -41,6 +41,7 @@ interface Props {
   stats: Stats
   upcomingEvents: UpcomingEvent[]
   recentClients: RecentClient[]
+  calendarEvents: string[]
   isNewUser: boolean
   profileComplete: boolean
 }
@@ -102,7 +103,83 @@ function StatCard({
   )
 }
 
-export default function DashboardShell({ artistName, stats, upcomingEvents, recentClients, isNewUser, profileComplete }: Props) {
+function MiniCalendar({ eventDates }: { eventDates: string[] }) {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth()
+  const today = now.getDate()
+
+  const eventDays = new Set(
+    eventDates
+      .map(d => new Date(d))
+      .filter(d => d.getFullYear() === year && d.getMonth() === month)
+      .map(d => d.getDate())
+  )
+
+  const monthName = now.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })
+  const firstDayOfMonth = new Date(year, month, 1).getDay()
+  const offset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  const cells: (number | null)[] = []
+  for (let i = 0; i < offset; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+  while (cells.length % 7 !== 0) cells.push(null)
+
+  return (
+    <div
+      className="rounded-xl p-4 flex flex-col gap-3"
+      style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}
+    >
+      <div className="flex items-center justify-between">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.8px]" style={{ color: 'var(--muted)' }}>
+          Este mes
+        </h2>
+        <span className="text-[11px] font-medium capitalize" style={{ color: 'var(--muted2)' }}>
+          {monthName}
+        </span>
+      </div>
+      <div className="grid grid-cols-7 gap-y-1">
+        {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(d => (
+          <div key={d} className="flex items-center justify-center" style={{ height: 22 }}>
+            <span className="text-[9px] font-bold" style={{ color: 'var(--muted)' }}>{d}</span>
+          </div>
+        ))}
+        {cells.map((day, i) => {
+          if (!day) return <div key={`e${i}`} style={{ height: 26 }} />
+          const isToday = day === today
+          const hasEvent = eventDays.has(day)
+          return (
+            <div key={day} className="flex flex-col items-center justify-center relative" style={{ height: 26 }}>
+              <div
+                className="w-[22px] h-[22px] flex items-center justify-center rounded-full"
+                style={{ background: isToday ? 'var(--accent)' : 'transparent' }}
+              >
+                <span
+                  className="text-[11px]"
+                  style={{
+                    color: isToday ? 'var(--bg)' : hasEvent ? 'var(--text)' : 'var(--muted2)',
+                    fontWeight: isToday || hasEvent ? 700 : 400,
+                  }}
+                >
+                  {day}
+                </span>
+              </div>
+              {hasEvent && !isToday && (
+                <div
+                  className="absolute rounded-full"
+                  style={{ width: 3, height: 3, background: 'var(--accent)', bottom: 1 }}
+                />
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+export default function DashboardShell({ artistName, stats, upcomingEvents, recentClients, calendarEvents, isNewUser, profileComplete }: Props) {
   const router = useRouter()
   const [showClientModal, setShowClientModal] = useState(false)
   const [showEventModal, setShowEventModal] = useState(false)
@@ -447,6 +524,9 @@ export default function DashboardShell({ artistName, stats, upcomingEvents, rece
               </Link>
             ))}
           </div>
+
+          {/* Mini calendario */}
+          <MiniCalendar eventDates={calendarEvents} />
         </div>
       </div>
 
