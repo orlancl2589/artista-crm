@@ -23,11 +23,14 @@ export default function NewClientModal({ open, onClose, onCreated }: Props) {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<CreateClientInput>({
     resolver: zodResolver(CreateClientSchema),
     defaultValues: { preferredChannel: 'whatsapp', tags: [] },
   })
+
+  const selectedChannel = watch('preferredChannel')
 
   if (!open) return null
 
@@ -150,24 +153,28 @@ export default function NewClientModal({ open, onClose, onCreated }: Props) {
               Canal preferido
             </label>
             <div className="flex gap-2">
-              {CHANNELS.map((ch) => (
-                <label
-                  key={ch.value}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-[9px] rounded-[var(--radius)] text-[13px] cursor-pointer transition-all"
-                  style={{
-                    background: 'var(--bg3)',
-                    border: '1px solid var(--border)',
-                  }}
-                >
-                  <input
-                    {...register('preferredChannel')}
-                    type="radio"
-                    value={ch.value}
-                    className="sr-only"
-                  />
-                  <span style={{ color: 'var(--text)' }}>{ch.label}</span>
-                </label>
-              ))}
+              {CHANNELS.map((ch) => {
+                const active = selectedChannel === ch.value
+                return (
+                  <label
+                    key={ch.value}
+                    className="flex-1 flex items-center justify-center py-[9px] rounded-[var(--radius)] text-[13px] font-medium cursor-pointer transition-all"
+                    style={{
+                      background: active ? 'rgba(200,255,0,0.08)' : 'var(--bg3)',
+                      border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
+                      color: active ? 'var(--accent)' : 'var(--muted2)',
+                    }}
+                  >
+                    <input
+                      {...register('preferredChannel')}
+                      type="radio"
+                      value={ch.value}
+                      className="sr-only"
+                    />
+                    {ch.label}
+                  </label>
+                )
+              })}
             </div>
           </div>
 
