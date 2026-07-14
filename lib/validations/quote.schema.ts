@@ -22,9 +22,28 @@ const optionalDatetime = z.preprocess(
   z.string().datetime().optional()
 )
 
+// Convierte "2024-01-15" (date input) a ISO datetime, o undefined si vacío
+const optionalDate = z.preprocess(
+  v => {
+    if (!v || v === '') return undefined
+    try { return new Date(v as string).toISOString() } catch { return undefined }
+  },
+  z.string().datetime().optional()
+)
+
+// Valida formato HH:MM o vacío → undefined
+const optionalTime = z.preprocess(
+  v => (!v || v === '' ? undefined : v),
+  z.string().regex(/^\d{2}:\d{2}$/, 'Formato HH:MM').optional()
+)
+
 export const CreateQuoteSchema = z.object({
   clientId: optionalId,
   eventId: optionalId,
+  eventDate: optionalDate,
+  eventEndDate: optionalDate,
+  eventStartTime: optionalTime,
+  eventEndTime: optionalTime,
   lineItems: z.array(LineItemSchema).min(1, 'Agrega al menos un concepto'),
   tax: z.number().nonnegative().default(0),
   currency: z.string().length(3).default('MXN'),

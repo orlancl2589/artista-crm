@@ -68,6 +68,10 @@ interface Props {
   artistLogoUrl: string | null
   clientName: string | null
   eventTitle: string | null
+  eventDate: string | null
+  eventEndDate: string | null
+  eventStartTime: string | null
+  eventEndTime: string | null
   lineItems: LineItem[]
   subtotal: string
   tax: string
@@ -76,9 +80,14 @@ interface Props {
   notes: string | null
 }
 
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
 export default function QuotePDF({
   quoteNumber, createdAt, validUntil,
   artistName, artistLogoUrl, clientName, eventTitle,
+  eventDate, eventEndDate, eventStartTime, eventEndTime,
   lineItems, subtotal, tax, total, currency, notes,
 }: Props) {
   const cur = currency as 'MXN' | 'USD'
@@ -133,6 +142,34 @@ export default function QuotePDF({
             </View>
           )}
         </View>
+
+        {/* Fecha y horario del evento */}
+        {(eventDate || eventStartTime) && (
+          <View style={{ flexDirection: 'row', gap: 32, marginBottom: 20 }}>
+            {eventDate && (
+              <View style={s.infoBlock}>
+                <Text style={s.infoLabel}>Fecha del evento</Text>
+                <Text style={s.infoValue}>
+                  {fmtDate(eventDate)}
+                  {eventEndDate && eventEndDate !== eventDate
+                    ? `  —  ${fmtDate(eventEndDate)}`
+                    : ''}
+                </Text>
+              </View>
+            )}
+            {(eventStartTime || eventEndTime) && (
+              <View style={s.infoBlock}>
+                <Text style={s.infoLabel}>Horario</Text>
+                <Text style={s.infoValue}>
+                  {eventStartTime ?? ''}
+                  {eventStartTime && eventEndTime ? ' – ' : ''}
+                  {eventEndTime ?? ''}
+                  {' hrs'}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
 
         {/* Tabla de conceptos */}
         <View style={s.tableHeader}>

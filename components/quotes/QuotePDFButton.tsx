@@ -13,6 +13,10 @@ interface Props {
   artistLogoUrl: string | null
   clientName: string | null
   eventTitle: string | null
+  eventDate: string | null
+  eventEndDate: string | null
+  eventStartTime: string | null
+  eventEndTime: string | null
   lineItems: LineItem[]
   subtotal: string
   tax: string
@@ -32,6 +36,10 @@ export default function QuotePDFButton(props: Props) {
         artistLogoUrl={props.artistLogoUrl}
         clientName={props.clientName}
         eventTitle={props.eventTitle}
+        eventDate={props.eventDate}
+        eventEndDate={props.eventEndDate}
+        eventStartTime={props.eventStartTime}
+        eventEndTime={props.eventEndTime}
         lineItems={props.lineItems}
         subtotal={props.subtotal}
         tax={props.tax}

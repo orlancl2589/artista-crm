@@ -24,6 +24,10 @@ interface Quote {
   tax: string
   total: string
   currency: string
+  eventDate: string | null
+  eventEndDate: string | null
+  eventStartTime: string | null
+  eventEndTime: string | null
   validUntil: string | null
   notes: string | null
   pdfUrl: string | null
@@ -154,6 +158,27 @@ export default function QuoteDetail({ quote: initial, artistName, artistLogoUrl 
                 )}
               </div>
             )}
+          {/* Fecha y horario del evento */}
+          {(quote.eventDate || quote.eventStartTime) && (
+            <div className="flex items-center gap-2 text-[13px] flex-wrap" style={{ color: 'var(--muted2)' }}>
+              <span>📅</span>
+              {quote.eventDate && (
+                <span>
+                  {new Date(quote.eventDate).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  {quote.eventEndDate && quote.eventEndDate !== quote.eventDate && (
+                    <> — {new Date(quote.eventEndDate).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</>
+                  )}
+                </span>
+              )}
+              {(quote.eventStartTime || quote.eventEndTime) && (
+                <span style={{ color: 'var(--muted)' }}>
+                  {quote.eventStartTime}
+                  {quote.eventEndTime && ` – ${quote.eventEndTime}`}
+                  {' hrs'}
+                </span>
+              )}
+            </div>
+          )}
           </div>
 
           {/* Acciones */}
@@ -166,6 +191,10 @@ export default function QuoteDetail({ quote: initial, artistName, artistLogoUrl 
               artistLogoUrl={artistLogoUrl}
               clientName={quote.client?.name ?? null}
               eventTitle={quote.event?.title ?? null}
+              eventDate={quote.eventDate}
+              eventEndDate={quote.eventEndDate}
+              eventStartTime={quote.eventStartTime}
+              eventEndTime={quote.eventEndTime}
               lineItems={quote.lineItems}
               subtotal={quote.subtotal}
               tax={quote.tax}

@@ -28,12 +28,23 @@ export default async function QuoteDetailPage({ params }: Props) {
 
   if (!quote || quote.artistId !== artist.id) notFound()
 
+  const q = quote as typeof quote & {
+    eventDate?: Date | null
+    eventEndDate?: Date | null
+    eventStartTime?: string | null
+    eventEndTime?: string | null
+  }
+
   const serialized = {
     ...quote,
     lineItems: quote.lineItems as { description: string; quantity: number; unitPrice: number; total: number }[],
     subtotal: quote.subtotal.toString(),
     tax: quote.tax.toString(),
     total: quote.total.toString(),
+    eventDate: q.eventDate?.toISOString() ?? null,
+    eventEndDate: q.eventEndDate?.toISOString() ?? null,
+    eventStartTime: q.eventStartTime ?? null,
+    eventEndTime: q.eventEndTime ?? null,
     validUntil: quote.validUntil?.toISOString() ?? null,
     signedAt: quote.signedAt?.toISOString() ?? null,
     createdAt: quote.createdAt.toISOString(),
