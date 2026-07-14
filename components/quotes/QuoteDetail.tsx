@@ -160,7 +160,6 @@ export default function QuoteDetail({ quote: initial, artistName, artistLogoUrl 
           <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
             <QuotePDFButton
               quoteNumber={quote.quoteNumber}
-              status={quote.status}
               createdAt={quote.createdAt}
               validUntil={quote.validUntil}
               artistName={artistName}

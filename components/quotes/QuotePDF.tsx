@@ -58,19 +58,10 @@ function fmt(n: number, currency = 'MXN') {
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency }).format(n)
 }
 
-const STATUS_LABELS: Record<string, { label: string; bg: string; color: string }> = {
-  draft:    { label: 'Borrador',  bg: '#f5f5f5', color: '#888' },
-  sent:     { label: 'Enviada',   bg: '#eff6ff', color: '#2563eb' },
-  accepted: { label: 'Aceptada',  bg: '#f0fdf4', color: '#16a34a' },
-  rejected: { label: 'Rechazada', bg: '#fef2f2', color: '#dc2626' },
-  expired:  { label: 'Expirada',  bg: '#fffbeb', color: '#d97706' },
-}
-
 interface LineItem { description: string; quantity: number; unitPrice: number; total: number }
 
 interface Props {
   quoteNumber: string
-  status: string
   createdAt: string
   validUntil: string | null
   artistName: string
@@ -85,14 +76,11 @@ interface Props {
   notes: string | null
 }
 
-const DEFAULT_CFG = { label: 'Borrador', bg: '#f5f5f5', color: '#888' }
-
 export default function QuotePDF({
-  quoteNumber, status, createdAt, validUntil,
+  quoteNumber, createdAt, validUntil,
   artistName, artistLogoUrl, clientName, eventTitle,
   lineItems, subtotal, tax, total, currency, notes,
 }: Props) {
-  const cfg = STATUS_LABELS[status] ?? DEFAULT_CFG
   const cur = currency as 'MXN' | 'USD'
   const taxNum = Number(tax)
 
@@ -103,12 +91,14 @@ export default function QuotePDF({
         {/* Header */}
         <View style={s.header}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={s.logoBox}>
-              {artistLogoUrl
-                ? <Image src={artistLogoUrl} style={{ width: 36, height: 36, objectFit: 'contain' }} />
-                : <Text style={s.logoText}>♪</Text>
-              }
-            </View>
+            {artistLogoUrl
+              ? <Image src={artistLogoUrl} style={{ width: 48, height: 48, objectFit: 'contain', marginRight: 10 }} />
+              : (
+                <View style={s.logoBox}>
+                  <Text style={s.logoText}>♪</Text>
+                </View>
+              )
+            }
             <View>
               <Text style={s.brandName}>{artistName}</Text>
               <Text style={s.brandSub}>Cotización profesional</Text>
@@ -116,9 +106,6 @@ export default function QuotePDF({
           </View>
           <View style={s.quoteNumWrap}>
             <Text style={s.quoteNum}>{quoteNumber}</Text>
-            <View style={[s.statusBadge, { backgroundColor: cfg.bg }]}>
-              <Text style={[s.statusText, { color: cfg.color }]}>{cfg.label}</Text>
-            </View>
           </View>
         </View>
 

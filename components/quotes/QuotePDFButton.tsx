@@ -7,7 +7,6 @@ interface LineItem { description: string; quantity: number; unitPrice: number; t
 
 interface Props {
   quoteNumber: string
-  status: string
   createdAt: string
   validUntil: string | null
   artistName: string
@@ -27,7 +26,6 @@ export default function QuotePDFButton(props: Props) {
     document: (
       <QuotePDF
         quoteNumber={props.quoteNumber}
-        status={props.status}
         createdAt={props.createdAt}
         validUntil={props.validUntil}
         artistName={props.artistName}
