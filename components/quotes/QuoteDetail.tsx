@@ -1,9 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/utils/currency'
 import ConvertToEventModal from './ConvertToEventModal'
+
+const QuotePDFButton = dynamic(() => import('./QuotePDFButton'), { ssr: false })
 
 interface LineItem {
   description: string
@@ -50,7 +53,7 @@ const STATUS_TRANSITIONS: Record<string, { label: string; next: string; style?: 
   expired:  [],
 }
 
-export default function QuoteDetail({ quote: initial }: { quote: Quote }) {
+export default function QuoteDetail({ quote: initial, artistName }: { quote: Quote; artistName: string }) {
   const router = useRouter()
   const [quote, setQuote] = useState(initial)
   const [deleting, setDeleting] = useState(false)
@@ -155,6 +158,21 @@ export default function QuoteDetail({ quote: initial }: { quote: Quote }) {
 
           {/* Acciones */}
           <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+            <QuotePDFButton
+              quoteNumber={quote.quoteNumber}
+              status={quote.status}
+              createdAt={quote.createdAt}
+              validUntil={quote.validUntil}
+              artistName={artistName}
+              clientName={quote.client?.name ?? null}
+              eventTitle={quote.event?.title ?? null}
+              lineItems={quote.lineItems}
+              subtotal={quote.subtotal}
+              tax={quote.tax}
+              total={quote.total}
+              currency={quote.currency}
+              notes={quote.notes}
+            />
             {/* Convertir en evento — solo si aceptada y sin evento vinculado */}
             {quote.status === 'accepted' && !quote.event && (
               <button
