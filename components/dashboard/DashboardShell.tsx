@@ -7,6 +7,14 @@ import NewClientModal from '@/components/clients/NewClientModal'
 import NewEventModal from '@/components/events/NewEventModal'
 import { formatCurrency } from '@/lib/utils/currency'
 
+interface CalendarEvent {
+  id: string
+  title: string
+  startDate: string
+  status: string
+  eventType: string
+}
+
 interface UpcomingEvent {
   id: string
   title: string
@@ -41,7 +49,7 @@ interface Props {
   stats: Stats
   upcomingEvents: UpcomingEvent[]
   recentClients: RecentClient[]
-  calendarEvents: string[]
+  calendarEvents: CalendarEvent[]
   isNewUser: boolean
   profileComplete: boolean
 }
@@ -103,18 +111,38 @@ function StatCard({
   )
 }
 
-function MiniCalendar({ eventDates }: { eventDates: string[] }) {
+const CAL_STATUS_COLOR: Record<string, string> = {
+  pending:   '#f59e0b',
+  confirmed: '#c8ff00',
+  completed: '#22c55e',
+  cancelled: '#ef4444',
+}
+const CAL_STATUS_LABEL: Record<string, string> = {
+  pending: 'Pendiente', confirmed: 'Confirmado', completed: 'Completado', cancelled: 'Cancelado',
+}
+const CAL_TYPE_LABEL: Record<string, string> = {
+  wedding: 'Boda', corporate: 'Corp.', birthday: 'Cumple',
+  quinceanera: 'XV', club: 'Club', private: 'Privado', other: 'Otro',
+}
+
+function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEvent: () => void }) {
+  const router = useRouter()
+  const [selectedDay, setSelectedDay] = useState<number | null>(null)
+
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth()
   const today = now.getDate()
 
-  const eventDays = new Set(
-    eventDates
-      .map(d => new Date(d))
-      .filter(d => d.getFullYear() === year && d.getMonth() === month)
-      .map(d => d.getDate())
-  )
+  const eventsByDay = new Map<number, CalendarEvent[]>()
+  events.forEach(e => {
+    const d = new Date(e.startDate)
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const day = d.getDate()
+      if (!eventsByDay.has(day)) eventsByDay.set(day, [])
+      eventsByDay.get(day)!.push(e)
+    }
+  })
 
   const monthName = now.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })
   const firstDayOfMonth = new Date(year, month, 1).getDay()
@@ -126,55 +154,176 @@ function MiniCalendar({ eventDates }: { eventDates: string[] }) {
   for (let d = 1; d <= daysInMonth; d++) cells.push(d)
   while (cells.length % 7 !== 0) cells.push(null)
 
+  const selectedEvents = selectedDay ? (eventsByDay.get(selectedDay) ?? []) : []
+  const selectedLabel = selectedDay
+    ? new Date(year, month, selectedDay).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
+    : null
+
   return (
     <div
-      className="rounded-xl p-4 flex flex-col gap-3"
+      className="rounded-xl flex flex-col overflow-hidden"
       style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}
     >
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
         <h2 className="text-[11px] font-bold uppercase tracking-[0.8px]" style={{ color: 'var(--muted)' }}>
-          Este mes
+          Calendario
         </h2>
         <span className="text-[11px] font-medium capitalize" style={{ color: 'var(--muted2)' }}>
           {monthName}
         </span>
       </div>
-      <div className="grid grid-cols-7 gap-y-1">
-        {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(d => (
-          <div key={d} className="flex items-center justify-center" style={{ height: 22 }}>
-            <span className="text-[9px] font-bold" style={{ color: 'var(--muted)' }}>{d}</span>
-          </div>
-        ))}
-        {cells.map((day, i) => {
-          if (!day) return <div key={`e${i}`} style={{ height: 26 }} />
-          const isToday = day === today
-          const hasEvent = eventDays.has(day)
-          return (
-            <div key={day} className="flex flex-col items-center justify-center relative" style={{ height: 26 }}>
-              <div
-                className="w-[22px] h-[22px] flex items-center justify-center rounded-full"
-                style={{ background: isToday ? 'var(--accent)' : 'transparent' }}
-              >
-                <span
-                  className="text-[11px]"
-                  style={{
-                    color: isToday ? 'var(--bg)' : hasEvent ? 'var(--text)' : 'var(--muted2)',
-                    fontWeight: isToday || hasEvent ? 700 : 400,
-                  }}
-                >
-                  {day}
-                </span>
-              </div>
-              {hasEvent && !isToday && (
-                <div
-                  className="absolute rounded-full"
-                  style={{ width: 3, height: 3, background: 'var(--accent)', bottom: 1 }}
-                />
-              )}
+
+      {/* Grid */}
+      <div className="px-3 pt-3 pb-2">
+        {/* Day headers */}
+        <div className="grid grid-cols-7 mb-1">
+          {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(d => (
+            <div key={d} className="flex items-center justify-center" style={{ height: 20 }}>
+              <span className="text-[9px] font-bold" style={{ color: 'var(--muted)' }}>{d}</span>
             </div>
-          )
-        })}
+          ))}
+        </div>
+
+        {/* Day cells */}
+        <div className="grid grid-cols-7">
+          {cells.map((day, i) => {
+            if (!day) return <div key={`e${i}`} style={{ height: 36 }} />
+            const isToday = day === today
+            const isSelected = day === selectedDay
+            const dayEvents = eventsByDay.get(day) ?? []
+            const hasEvents = dayEvents.length > 0
+
+            return (
+              <div
+                key={day}
+                onClick={() => setSelectedDay(isSelected ? null : day)}
+                className="flex flex-col items-center justify-center cursor-pointer rounded-[6px] transition-all"
+                style={{
+                  height: 36,
+                  background: isSelected ? 'var(--bg4)' : isToday ? 'var(--accent)15' : 'transparent',
+                  border: isSelected ? '1px solid var(--border)' : '1px solid transparent',
+                }}
+                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--bg3)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = isSelected ? 'var(--bg4)' : isToday ? 'var(--accent)15' : 'transparent' }}
+              >
+                <div
+                  className="w-[22px] h-[22px] flex items-center justify-center rounded-full"
+                  style={{ background: isToday ? 'var(--accent)' : 'transparent' }}
+                >
+                  <span
+                    className="text-[11px]"
+                    style={{
+                      color: isToday ? 'var(--bg)' : hasEvents ? 'var(--text)' : 'var(--muted2)',
+                      fontWeight: isToday || hasEvents ? 700 : 400,
+                    }}
+                  >
+                    {day}
+                  </span>
+                </div>
+                {/* Status dots */}
+                {hasEvents && (
+                  <div className="flex gap-[2px] mt-[2px]">
+                    {dayEvents.slice(0, 3).map((ev, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          width: 4, height: 4, borderRadius: '50%',
+                          background: isToday ? 'var(--bg)' : (CAL_STATUS_COLOR[ev.status] ?? 'var(--accent)'),
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
       </div>
+
+      {/* Selected day panel */}
+      {selectedDay && (
+        <div style={{ borderTop: '1px solid var(--border)' }}>
+          <div className="px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)' }}>
+            <p className="text-[11px] font-semibold capitalize" style={{ color: 'var(--text)' }}>
+              {selectedLabel}
+            </p>
+            {selectedEvents.length > 0 && (
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                style={{ background: 'var(--bg3)', color: 'var(--muted2)' }}>
+                {selectedEvents.length} evento{selectedEvents.length !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+
+          {selectedEvents.length > 0 ? (
+            <div className="flex flex-col">
+              {selectedEvents.map(ev => (
+                <div
+                  key={ev.id}
+                  onClick={() => router.push(`/events/${ev.id}`)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 cursor-pointer transition-colors"
+                  style={{ borderBottom: '1px solid var(--border)' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg3)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: CAL_STATUS_COLOR[ev.status] ?? 'var(--muted)' }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold truncate" style={{ color: 'var(--text)' }}>{ev.title}</p>
+                    <p className="text-[10px]" style={{ color: 'var(--muted2)' }}>
+                      {CAL_TYPE_LABEL[ev.eventType] ?? ev.eventType} · {CAL_STATUS_LABEL[ev.status] ?? ev.status}
+                    </p>
+                  </div>
+                  <span className="text-[11px]" style={{ color: 'var(--muted)' }}>→</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="px-4 py-2.5 text-[11px]" style={{ color: 'var(--muted)' }}>Sin eventos este día</p>
+          )}
+
+          <div className="flex gap-2 px-4 py-3">
+            <button
+              onClick={onNewEvent}
+              className="flex-1 py-[7px] rounded-[var(--radius)] text-[11px] font-bold"
+              style={{ background: 'var(--accent)', color: 'var(--bg)' }}
+            >
+              + Evento
+            </button>
+            <button
+              onClick={() => router.push('/quotes/new')}
+              className="flex-1 py-[7px] rounded-[var(--radius)] text-[11px] font-medium transition-colors"
+              style={{ background: 'var(--bg3)', color: 'var(--muted2)', border: '1px solid var(--border)' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.background = 'var(--bg4)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--muted2)'; e.currentTarget.style.background = 'var(--bg3)' }}
+            >
+              + Cotización
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Default footer — sin día seleccionado */}
+      {!selectedDay && (
+        <div className="flex gap-2 px-4 py-3" style={{ borderTop: '1px solid var(--border)' }}>
+          <button
+            onClick={onNewEvent}
+            className="flex-1 py-[7px] rounded-[var(--radius)] text-[11px] font-bold"
+            style={{ background: 'var(--accent)', color: 'var(--bg)' }}
+          >
+            + Evento
+          </button>
+          <button
+            onClick={() => router.push('/quotes/new')}
+            className="flex-1 py-[7px] rounded-[var(--radius)] text-[11px] font-medium transition-colors"
+            style={{ background: 'var(--bg3)', color: 'var(--muted2)', border: '1px solid var(--border)' }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.background = 'var(--bg4)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--muted2)'; e.currentTarget.style.background = 'var(--bg3)' }}
+          >
+            + Cotización
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -526,7 +675,7 @@ export default function DashboardShell({ artistName, stats, upcomingEvents, rece
           </div>
 
           {/* Mini calendario */}
-          <MiniCalendar eventDates={calendarEvents} />
+          <MiniCalendar events={calendarEvents} onNewEvent={() => setShowEventModal(true)} />
         </div>
       </div>
 

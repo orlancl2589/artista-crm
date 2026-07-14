@@ -32,15 +32,16 @@ export default async function DashboardPage() {
     activeClients,
     upcomingEvents,
     recentClients,
+    calendarEventsThisMonth,
   ] = await Promise.all([
-    // Eventos este mes (confirmados + completados)
+    // Eventos este mes (confirmados + completados) — solo para stats de ingresos
     prisma.event.findMany({
       where: {
         artistId: artist.id,
         startDate: { gte: monthStart, lt: monthEnd },
         status: { in: ['confirmed', 'completed'] },
       },
-      select: { price: true, startDate: true },
+      select: { price: true },
     }),
 
     // Eventos mes anterior
@@ -94,6 +95,16 @@ export default async function DashboardPage() {
         createdAt: true,
       },
     }),
+
+    // Todos los eventos del mes en curso (todos los estatus) — para el mini calendario
+    prisma.event.findMany({
+      where: {
+        artistId: artist.id,
+        startDate: { gte: monthStart, lt: monthEnd },
+      },
+      orderBy: { startDate: 'asc' },
+      select: { id: true, title: true, startDate: true, status: true, eventType: true },
+    }),
   ])
 
   // Contar próximos totales (para el stat card)
@@ -128,7 +139,13 @@ export default async function DashboardPage() {
         activeClients,
         upcomingCount,
       }}
-      calendarEvents={eventsThisMonth.map((e) => e.startDate.toISOString())}
+      calendarEvents={calendarEventsThisMonth.map((e) => ({
+        id: e.id,
+        title: e.title,
+        startDate: e.startDate.toISOString(),
+        status: e.status,
+        eventType: e.eventType,
+      }))}
       upcomingEvents={upcomingEvents.map((e) => ({
         ...e,
         startDate: e.startDate.toISOString(),
