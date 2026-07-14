@@ -105,10 +105,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     // Registrar contacto cuando se envía la cotización al cliente
     const newStatus = parsed.data.status
     if (newStatus === 'sent' && newStatus !== existing.status && updated.clientId) {
-      prisma.client.update({
+      await prisma.client.update({
         where: { id: updated.clientId },
         data: { lastContact: new Date() },
-      }).catch(() => {})
+      })
     }
 
     // Email de notificación cuando cambia el status (fire-and-forget)
