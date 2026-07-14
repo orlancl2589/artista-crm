@@ -145,6 +145,11 @@ export default function NewClientModal({ open, onClose, onCreated }: Props) {
                 color: 'var(--text)',
               }}
             />
+            {errors.email && (
+              <span className="text-[11px]" style={{ color: '#ef4444' }}>
+                {errors.email.message}
+              </span>
+            )}
           </div>
 
           {/* Canal preferido */}
