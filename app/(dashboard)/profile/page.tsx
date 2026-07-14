@@ -19,6 +19,7 @@ export default async function ProfilePage() {
     ...artist,
     basePrice: artist.basePrice?.toString() ?? null,
     rating: artist.rating?.toString() ?? null,
+    logoUrl: (artist as { logoUrl?: string | null }).logoUrl ?? null,
     createdAt: artist.createdAt.toISOString(),
     updatedAt: artist.updatedAt.toISOString(),
     email: user.email ?? '',

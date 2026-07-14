@@ -61,6 +61,7 @@ export default async function ClientDetailPage({ params }: Props) {
     ...client,
     phone: decrypt(client.phone),
     phoneFormatted: formatPhone(decrypt(client.phone)),
+    photoUrl: (client as { photoUrl?: string | null }).photoUrl ?? null,
     totalSpent: client.totalSpent.toString(),
     birthdate: client.birthdate?.toISOString() ?? null,
     lastContact: client.lastContact?.toISOString() ?? null,

@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer'
+import { Document, Page, View, Text, StyleSheet, Image } from '@react-pdf/renderer'
 
 const s = StyleSheet.create({
   page: { fontFamily: 'Helvetica', fontSize: 10, color: '#111', backgroundColor: '#fff', padding: 40 },
@@ -74,6 +74,7 @@ interface Props {
   createdAt: string
   validUntil: string | null
   artistName: string
+  artistLogoUrl: string | null
   clientName: string | null
   eventTitle: string | null
   lineItems: LineItem[]
@@ -88,7 +89,7 @@ const DEFAULT_CFG = { label: 'Borrador', bg: '#f5f5f5', color: '#888' }
 
 export default function QuotePDF({
   quoteNumber, status, createdAt, validUntil,
-  artistName, clientName, eventTitle,
+  artistName, artistLogoUrl, clientName, eventTitle,
   lineItems, subtotal, tax, total, currency, notes,
 }: Props) {
   const cfg = STATUS_LABELS[status] ?? DEFAULT_CFG
@@ -103,7 +104,10 @@ export default function QuotePDF({
         <View style={s.header}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <View style={s.logoBox}>
-              <Text style={s.logoText}>♪</Text>
+              {artistLogoUrl
+                ? <Image src={artistLogoUrl} style={{ width: 36, height: 36, objectFit: 'contain' }} />
+                : <Text style={s.logoText}>♪</Text>
+              }
             </View>
             <View>
               <Text style={s.brandName}>{artistName}</Text>

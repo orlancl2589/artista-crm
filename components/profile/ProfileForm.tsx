@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
+import ImageUpload from '@/components/shared/ImageUpload'
 
 const ARTIST_TYPE_LABELS: Record<string, string> = {
   dj: 'DJ', band: 'Banda', mariachi: 'Mariachi',
@@ -26,6 +27,7 @@ interface Artist {
   currency: string
   experienceYears: number | null
   whatsappNumber: string | null
+  logoUrl: string | null
   createdAt: string
   email: string
 }
@@ -56,6 +58,7 @@ export default function ProfileForm({ artist }: { artist: Artist }) {
     whatsappNumber: artist.whatsappNumber ?? '',
     artistType: artist.artistType,
   })
+  const [logoUrl, setLogoUrl] = useState<string | null>(artist.logoUrl)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -95,6 +98,15 @@ export default function ProfileForm({ artist }: { artist: Artist }) {
     } finally {
       setSaving(false)
     }
+  }
+
+  async function uploadLogo(url: string) {
+    setLogoUrl(url)
+    await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: form.name, logoUrl: url }),
+    })
   }
 
   async function handleSignOut() {
@@ -147,7 +159,23 @@ export default function ProfileForm({ artist }: { artist: Artist }) {
 
       {/* Form */}
       <form onSubmit={handleSave} className="rounded-xl p-6 flex flex-col gap-4" style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}>
-        <h2 className="text-[14px] font-bold" style={{ color: 'var(--text)' }}>Información general</h2>
+        <div className="flex items-center gap-5">
+          <ImageUpload
+            currentUrl={logoUrl}
+            storagePath={`logos/${artist.id}`}
+            onUploaded={uploadLogo}
+            shape="rounded"
+            size={72}
+            placeholder="🎵"
+            label="Logo"
+          />
+          <div>
+            <h2 className="text-[14px] font-bold" style={{ color: 'var(--text)' }}>Información general</h2>
+            <p className="text-[11px] mt-0.5" style={{ color: 'var(--muted2)' }}>
+              El logo aparecerá en tus cotizaciones PDF
+            </p>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">

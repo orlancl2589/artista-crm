@@ -53,7 +53,7 @@ const STATUS_TRANSITIONS: Record<string, { label: string; next: string; style?: 
   expired:  [],
 }
 
-export default function QuoteDetail({ quote: initial, artistName }: { quote: Quote; artistName: string }) {
+export default function QuoteDetail({ quote: initial, artistName, artistLogoUrl }: { quote: Quote; artistName: string; artistLogoUrl: string | null }) {
   const router = useRouter()
   const [quote, setQuote] = useState(initial)
   const [deleting, setDeleting] = useState(false)
@@ -164,6 +164,7 @@ export default function QuoteDetail({ quote: initial, artistName }: { quote: Quo
               createdAt={quote.createdAt}
               validUntil={quote.validUntil}
               artistName={artistName}
+              artistLogoUrl={artistLogoUrl}
               clientName={quote.client?.name ?? null}
               eventTitle={quote.event?.title ?? null}
               lineItems={quote.lineItems}

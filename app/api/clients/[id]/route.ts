@@ -48,7 +48,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       throw new ApiError(parsed.error.errors[0]?.message ?? 'Datos inválidos', 400)
     }
 
-    const { phone, email, birthdate, ...rest } = parsed.data
+    const { phone, email, birthdate, photoUrl, ...rest } = parsed.data
 
     const updated = await prisma.client.update({
       where: { id: params.id },
@@ -57,6 +57,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         ...(phone && { phone: encrypt(normalizePhone(phone)) }),
         ...(email !== undefined && { email: email || null }),
         ...(birthdate !== undefined && { birthdate: birthdate ? new Date(birthdate) : null }),
+        ...(photoUrl !== undefined && { photoUrl }),
       },
       select: {
         id: true,
@@ -67,6 +68,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         tags: true,
         notes: true,
         isActive: true,
+        photoUrl: true,
         updatedAt: true,
       },
     })

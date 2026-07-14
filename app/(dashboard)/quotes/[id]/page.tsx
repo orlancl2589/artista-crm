@@ -45,7 +45,7 @@ export default async function QuoteDetailPage({ params }: Props) {
 
   return (
     <main className="flex-1 overflow-y-auto p-6">
-      <QuoteDetail quote={serialized} artistName={artist.name} />
+      <QuoteDetail quote={serialized} artistName={artist.name} artistLogoUrl={(artist as { logoUrl?: string | null }).logoUrl ?? null} />
     </main>
   )
 }

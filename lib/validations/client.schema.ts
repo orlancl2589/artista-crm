@@ -13,7 +13,9 @@ export const CreateClientSchema = z.object({
   notes: z.string().max(500).optional(),
 })
 
-export const UpdateClientSchema = CreateClientSchema.partial()
+export const UpdateClientSchema = CreateClientSchema.partial().extend({
+  photoUrl: z.string().url().optional().nullable(),
+})
 
 export type CreateClientInput = z.infer<typeof CreateClientSchema>
 export type UpdateClientInput = z.infer<typeof UpdateClientSchema>

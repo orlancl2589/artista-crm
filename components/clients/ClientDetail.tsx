@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { UpdateClientSchema, type UpdateClientInput } from '@/lib/validations/client.schema'
 import { formatCurrency } from '@/lib/utils/currency'
+import ImageUpload from '@/components/shared/ImageUpload'
 
 interface ClientEvent {
   id: string
@@ -28,6 +29,7 @@ interface ClientQuote {
 
 interface Client {
   id: string
+  artistId: string
   name: string
   phone: string
   phoneFormatted: string
@@ -37,6 +39,7 @@ interface Client {
   tags: string[]
   notes: string | null
   isActive: boolean
+  photoUrl: string | null
   totalSpent: string
   totalEvents: number
   lastContact: string | null
@@ -105,6 +108,15 @@ export default function ClientDetail({ client: initial }: { client: Client }) {
   const [deleting, setDeleting] = useState(false)
   const [serverError, setServerError] = useState('')
   const [copied, setCopied] = useState(false)
+
+  async function uploadPhoto(url: string) {
+    await fetch(`/api/clients/${client.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ photoUrl: url }),
+    })
+    setClient(prev => ({ ...prev, photoUrl: url }))
+  }
 
   const {
     register,
@@ -197,12 +209,14 @@ export default function ClientDetail({ client: initial }: { client: Client }) {
         style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}
       >
         <div className="flex items-center gap-4">
-          <div
-            className="w-14 h-14 rounded-full flex items-center justify-center text-[22px] font-extrabold flex-shrink-0"
-            style={{ background: 'var(--bg3)', color: 'var(--accent)' }}
-          >
-            {client.name[0]?.toUpperCase()}
-          </div>
+          <ImageUpload
+            currentUrl={client.photoUrl}
+            storagePath={`client-photos/${client.artistId}/${client.id}`}
+            onUploaded={uploadPhoto}
+            shape="circle"
+            size={56}
+            placeholder={client.name[0]?.toUpperCase() ?? '?'}
+          />
           <div className="flex flex-col gap-1">
             <h1 className="text-[22px] font-extrabold tracking-[-0.5px]" style={{ color: 'var(--text)' }}>
               {client.name}

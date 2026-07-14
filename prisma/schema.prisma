@@ -47,6 +47,9 @@ model Artist {
   birthdayEngineOn     Boolean    @default(false)
   birthdayDaysBefore   Int        @default(7)
 
+  // Imágenes
+  logoUrl              String?
+
   // Página pública
   pagePublished        Boolean    @default(false)
   customDomain         String?    @unique
@@ -80,6 +83,8 @@ model Client {
   tags             String[]
   notes            String?
   isActive         Boolean  @default(true)
+
+  photoUrl         String?
 
   totalSpent       Decimal  @default(0) @db.Decimal(10, 2)
   totalEvents      Int      @default(0)

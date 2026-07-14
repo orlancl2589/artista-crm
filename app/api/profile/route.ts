@@ -15,6 +15,7 @@ const UpdateProfileSchema = z.object({
   experienceYears: z.number().int().min(0).max(99).optional().nullable(),
   whatsappNumber: z.string().max(20).optional().nullable(),
   artistType: z.enum(['dj', 'band', 'mariachi', 'soloist', 'agency', 'other']).optional(),
+  logoUrl: z.string().url().optional().nullable(),
 })
 
 export async function PATCH(req: NextRequest) {

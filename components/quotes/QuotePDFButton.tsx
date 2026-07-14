@@ -11,6 +11,7 @@ interface Props {
   createdAt: string
   validUntil: string | null
   artistName: string
+  artistLogoUrl: string | null
   clientName: string | null
   eventTitle: string | null
   lineItems: LineItem[]
@@ -30,6 +31,7 @@ export default function QuotePDFButton(props: Props) {
         createdAt={props.createdAt}
         validUntil={props.validUntil}
         artistName={props.artistName}
+        artistLogoUrl={props.artistLogoUrl}
         clientName={props.clientName}
         eventTitle={props.eventTitle}
         lineItems={props.lineItems}
