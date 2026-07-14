@@ -84,12 +84,14 @@ interface Props {
   notes: string | null
 }
 
+const DEFAULT_CFG = { label: 'Borrador', bg: '#f5f5f5', color: '#888' }
+
 export default function QuotePDF({
   quoteNumber, status, createdAt, validUntil,
   artistName, clientName, eventTitle,
   lineItems, subtotal, tax, total, currency, notes,
 }: Props) {
-  const cfg = STATUS_LABELS[status] ?? STATUS_LABELS.draft
+  const cfg = STATUS_LABELS[status] ?? DEFAULT_CFG
   const cur = currency as 'MXN' | 'USD'
   const taxNum = Number(tax)
 
