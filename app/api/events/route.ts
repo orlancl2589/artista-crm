@@ -126,6 +126,14 @@ export async function POST(req: NextRequest) {
       include: { client: { select: { id: true, name: true } } },
     })
 
+    // Registrar contacto al crear evento para un cliente
+    if (clientId) {
+      prisma.client.update({
+        where: { id: clientId },
+        data: { lastContact: new Date() },
+      }).catch(() => {})
+    }
+
     return Response.json(
       {
         data: {
