@@ -1,7 +1,6 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 interface Props {
   currentUrl: string | null
@@ -22,7 +21,6 @@ export default function ImageUpload({
   placeholder = '📷',
   label,
 }: Props) {
-  const supabase = createClientComponentClient()
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
@@ -50,29 +48,29 @@ export default function ImageUpload({
     const ext = file.name.split('.').pop() ?? 'jpg'
     const path = `${storagePath}/photo.${ext}`
 
-    const { error: upErr } = await supabase.storage
-      .from('uploads')
-      .upload(path, file, { upsert: true, contentType: file.type })
-
-    if (upErr) {
-      setError('Error al subir imagen')
-      setPreview(currentUrl)
-      setUploading(false)
-      return
-    }
-
-    const { data } = supabase.storage.from('uploads').getPublicUrl(path)
-    // add cache-busting param so the browser reloads the new image
-    const publicUrl = `${data.publicUrl}?t=${Date.now()}`
-
     try {
+      const form = new FormData()
+      form.append('file', file)
+      form.append('path', path)
+
+      const res = await fetch('/api/upload', { method: 'POST', body: form })
+      const json = await res.json()
+
+      if (!res.ok) {
+        setError(json.error ?? 'Error al subir imagen')
+        setPreview(currentUrl)
+        return
+      }
+
+      // add cache-busting so browser reloads new image
+      const publicUrl = `${json.url}?t=${Date.now()}`
       await onUploaded(publicUrl)
       setPreview(publicUrl)
     } catch {
-      setError('Error al guardar')
+      setError('Error de conexión')
+      setPreview(currentUrl)
     } finally {
       setUploading(false)
-      // reset input so same file can be re-selected
       if (inputRef.current) inputRef.current.value = ''
     }
   }
@@ -105,6 +103,7 @@ export default function ImageUpload({
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'border-color 0.15s',
+          padding: 0,
         }}
         onMouseEnter={(e) => { if (!uploading) e.currentTarget.style.borderColor = 'var(--accent)' }}
         onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)' }}
@@ -119,12 +118,13 @@ export default function ImageUpload({
         ) : (
           <span style={{ fontSize: size * 0.35 }}>{placeholder}</span>
         )}
-        {/* overlay on hover */}
+
+        {/* Overlay */}
         <span
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'rgba(0,0,0,0.45)',
+            background: 'rgba(0,0,0,0.5)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -133,8 +133,9 @@ export default function ImageUpload({
             fontWeight: 600,
             opacity: uploading ? 1 : 0,
             transition: 'opacity 0.15s',
+            pointerEvents: 'none',
           }}
-          className="hover:opacity-100"
+          className="hover-overlay"
         >
           {uploading ? '...' : '✏️'}
         </span>
@@ -143,7 +144,7 @@ export default function ImageUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         className="hidden"
         onChange={handleFile}
       />
