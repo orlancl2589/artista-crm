@@ -1,7 +1,7 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import ComingSoon from '@/components/ui/ComingSoon'
 
-export const metadata: Metadata = { title: 'Campañas — Artista CRM' }
+export const metadata: Metadata = { title: 'Campañas — R-TIST' }
 
 export default function CampañasAdsPage() {
   return (

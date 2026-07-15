@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { getArtistFromSession } from '@/lib/db/artists'
@@ -8,7 +8,7 @@ import { formatPhone } from '@/lib/utils/phone'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Dashboard — Artista CRM' }
+export const metadata: Metadata = { title: 'Dashboard — R-TIST' }
 
 export default async function DashboardPage() {
   const supabase = createServerComponentClient({ cookies })

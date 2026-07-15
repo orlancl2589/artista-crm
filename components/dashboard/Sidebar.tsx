@@ -9,6 +9,7 @@ interface SidebarProps {
   onClose?: () => void
   artistName: string
   artistLogoUrl: string | null
+  artistPlan: string
 }
 
 const NAV_MAIN = [
@@ -90,7 +91,9 @@ function NavItem({
   )
 }
 
-export default function Sidebar({ onClose, artistName, artistLogoUrl }: SidebarProps) {
+const PLAN_LABEL: Record<string, string> = { free: 'Plan Free', pro: 'Plan Pro', premium: 'Premium' }
+
+export default function Sidebar({ onClose, artistName, artistLogoUrl, artistPlan }: SidebarProps) {
   return (
     <aside
       className="w-[220px] min-w-[220px] h-full flex flex-col relative z-10"
@@ -186,7 +189,7 @@ export default function Sidebar({ onClose, artistName, artistLogoUrl }: SidebarP
               {artistName || 'Mi perfil'}
             </div>
             <div className="font-mono text-[10px]" style={{ color: 'var(--muted2)' }}>
-              Plan Free
+              {PLAN_LABEL[artistPlan] ?? 'Plan Free'}
             </div>
           </div>
         </Link>

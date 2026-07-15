@@ -13,9 +13,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const artist = await getArtistFromSession(session.user.id)
   const logoUrl = (artist as { logoUrl?: string | null } | null)?.logoUrl ?? null
+  const plan = artist?.plan ?? 'free'
 
   return (
-    <DashboardLayoutClient artistName={artist?.name ?? ''} artistLogoUrl={logoUrl}>
+    <DashboardLayoutClient artistName={artist?.name ?? ''} artistLogoUrl={logoUrl} artistPlan={String(plan)}>
       {children}
     </DashboardLayoutClient>
   )

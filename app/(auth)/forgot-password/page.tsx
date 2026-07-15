@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
           🎵
         </div>
         <div>
-          <div className="font-bold text-[15px] leading-tight" style={{ color: 'var(--text)' }}>Artista CRM</div>
+          <div className="font-bold text-[15px] leading-tight" style={{ color: 'var(--text)' }}>R-TIST</div>
           <div className="font-mono text-[10px] tracking-wide" style={{ color: 'var(--muted2)' }}>Recuperar contraseña</div>
         </div>
       </div>

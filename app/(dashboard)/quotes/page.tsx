@@ -1,7 +1,7 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import QuoteList from '@/components/quotes/QuoteList'
 
-export const metadata: Metadata = { title: 'Cotizaciones — Artista CRM' }
+export const metadata: Metadata = { title: 'Cotizaciones — R-TIST' }
 
 export default function QuotesPage() {
   return (

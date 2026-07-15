@@ -1,11 +1,11 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { getArtistFromSession } from '@/lib/db/artists'
 import ProfileForm from '@/components/profile/ProfileForm'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Mi Perfil — Artista CRM' }
+export const metadata: Metadata = { title: 'Mi Perfil — R-TIST' }
 
 export default async function ProfilePage() {
   const supabase = createServerComponentClient({ cookies })

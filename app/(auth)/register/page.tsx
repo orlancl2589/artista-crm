@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -49,6 +49,12 @@ export default function RegisterPage() {
 
     // Si email confirmation está desactivado, Supabase devuelve sesión inmediatamente
     if (data.session) {
+      // Sincroniza el nombre artístico con el registro creado por el trigger de Supabase
+      await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, artistType }),
+      }).catch(() => {})
       router.push('/dashboard')
       return
     }
@@ -100,7 +106,7 @@ export default function RegisterPage() {
         </div>
         <div>
           <div className="font-bold text-[15px] leading-tight" style={{ color: 'var(--text)' }}>
-            Artista CRM
+            R-TIST
           </div>
           <div className="font-mono text-[10px] tracking-wide" style={{ color: 'var(--muted2)' }}>
             Crea tu cuenta gratis

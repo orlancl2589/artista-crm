@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -48,7 +48,7 @@ export default function ResetPasswordPage() {
           🎵
         </div>
         <div>
-          <div className="font-bold text-[15px] leading-tight" style={{ color: 'var(--text)' }}>Artista CRM</div>
+          <div className="font-bold text-[15px] leading-tight" style={{ color: 'var(--text)' }}>R-TIST</div>
           <div className="font-mono text-[10px] tracking-wide" style={{ color: 'var(--muted2)' }}>Nueva contraseña</div>
         </div>
       </div>

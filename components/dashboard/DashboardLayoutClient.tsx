@@ -9,9 +9,10 @@ interface Props {
   children: React.ReactNode
   artistName: string
   artistLogoUrl: string | null
+  artistPlan: string
 }
 
-export default function DashboardLayoutClient({ children, artistName, artistLogoUrl }: Props) {
+export default function DashboardLayoutClient({ children, artistName, artistLogoUrl, artistPlan }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
@@ -22,7 +23,7 @@ export default function DashboardLayoutClient({ children, artistName, artistLogo
 
       {/* Sidebar desktop */}
       <div className="hidden lg:block flex-shrink-0">
-        <Sidebar artistName={artistName} artistLogoUrl={artistLogoUrl} />
+        <Sidebar artistName={artistName} artistLogoUrl={artistLogoUrl} artistPlan={artistPlan} />
       </div>
 
       {/* Sidebar mobile — overlay */}
@@ -34,7 +35,7 @@ export default function DashboardLayoutClient({ children, artistName, artistLogo
             onClick={() => setSidebarOpen(false)}
           />
           <div className="fixed inset-y-0 left-0 z-50 lg:hidden">
-            <Sidebar artistName={artistName} artistLogoUrl={artistLogoUrl} onClose={() => setSidebarOpen(false)} />
+            <Sidebar artistName={artistName} artistLogoUrl={artistLogoUrl} artistPlan={artistPlan} onClose={() => setSidebarOpen(false)} />
           </div>
         </>
       )}

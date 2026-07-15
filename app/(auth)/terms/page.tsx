@@ -1,7 +1,7 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Términos de Servicio — Artista CRM' }
+export const metadata: Metadata = { title: 'Términos de Servicio — R-TIST' }
 
 export default function TermsPage() {
   return (
@@ -11,7 +11,7 @@ export default function TermsPage() {
           🎵
         </div>
         <div>
-          <div className="font-bold text-[15px] leading-tight" style={{ color: 'var(--text)' }}>Artista CRM</div>
+          <div className="font-bold text-[15px] leading-tight" style={{ color: 'var(--text)' }}>R-TIST</div>
           <div className="font-mono text-[10px] tracking-wide" style={{ color: 'var(--muted2)' }}>Términos de Servicio</div>
         </div>
       </div>
@@ -25,15 +25,15 @@ export default function TermsPage() {
         {[
           {
             title: '1. Aceptación',
-            body: 'Al registrarte y usar Artista CRM aceptas estos términos. Si no estás de acuerdo, no uses el servicio. Artista CRM es una herramienta de gestión para artistas y músicos en México y Latinoamérica.',
+            body: 'Al registrarte y usar R-TIST aceptas estos términos. Si no estás de acuerdo, no uses el servicio. R-TIST es una herramienta de gestión para artistas y músicos en México y Latinoamérica.',
           },
           {
             title: '2. Descripción del servicio',
-            body: 'Artista CRM es un software de gestión de clientes, eventos y cotizaciones para artistas y músicos. Ofrecemos un plan gratuito con funcionalidades limitadas y planes de pago con acceso completo.',
+            body: 'R-TIST es un software de gestión de clientes, eventos y cotizaciones para artistas y músicos. Ofrecemos un plan gratuito con funcionalidades limitadas y planes de pago con acceso completo.',
           },
           {
             title: '3. Uso aceptable',
-            body: 'Te comprometes a usar el servicio únicamente para fines legítimos de gestión de tu actividad artística. Está prohibido usar Artista CRM para enviar spam, almacenar contenido ilegal o intentar acceder a datos de otros usuarios.',
+            body: 'Te comprometes a usar el servicio únicamente para fines legítimos de gestión de tu actividad artística. Está prohibido usar R-TIST para enviar spam, almacenar contenido ilegal o intentar acceder a datos de otros usuarios.',
           },
           {
             title: '4. Tu cuenta',
@@ -45,11 +45,11 @@ export default function TermsPage() {
           },
           {
             title: '6. Propiedad intelectual',
-            body: 'El código, diseño y contenido de Artista CRM son propiedad de sus desarrolladores. Tu contenido (datos de clientes, cotizaciones, etc.) es de tu propiedad.',
+            body: 'El código, diseño y contenido de R-TIST son propiedad de sus desarrolladores. Tu contenido (datos de clientes, cotizaciones, etc.) es de tu propiedad.',
           },
           {
             title: '7. Limitación de responsabilidad',
-            body: 'Artista CRM se proporciona "tal cual". No garantizamos disponibilidad ininterrumpida del servicio. No somos responsables por pérdida de datos derivada de fallas técnicas fuera de nuestro control.',
+            body: 'R-TIST se proporciona "tal cual". No garantizamos disponibilidad ininterrumpida del servicio. No somos responsables por pérdida de datos derivada de fallas técnicas fuera de nuestro control.',
           },
           {
             title: '8. Modificaciones',

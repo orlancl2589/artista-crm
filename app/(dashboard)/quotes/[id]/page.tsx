@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
 
 interface Props { params: { id: string } }
 
-export const metadata: Metadata = { title: 'Cotización — Artista CRM' }
+export const metadata: Metadata = { title: 'Cotización — R-TIST' }
 
 export default async function QuoteDetailPage({ params }: Props) {
   const supabase = createServerComponentClient({ cookies })

@@ -1,7 +1,7 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Política de Privacidad — Artista CRM' }
+export const metadata: Metadata = { title: 'Política de Privacidad — R-TIST' }
 
 export default function PrivacyPage() {
   return (
@@ -11,7 +11,7 @@ export default function PrivacyPage() {
           🎵
         </div>
         <div>
-          <div className="font-bold text-[15px] leading-tight" style={{ color: 'var(--text)' }}>Artista CRM</div>
+          <div className="font-bold text-[15px] leading-tight" style={{ color: 'var(--text)' }}>R-TIST</div>
           <div className="font-mono text-[10px] tracking-wide" style={{ color: 'var(--muted2)' }}>Política de Privacidad</div>
         </div>
       </div>
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           },
           {
             title: '3. Datos de tus clientes',
-            body: 'Los números de teléfono y datos personales de tus clientes que almacenas en Artista CRM se cifran con AES-256 en reposo. Eres el responsable del tratamiento de esos datos frente a tus clientes. Te recomendamos informarles que sus datos están almacenados en tu CRM.',
+            body: 'Los números de teléfono y datos personales de tus clientes que almacenas en R-TIST se cifran con AES-256 en reposo. Eres el responsable del tratamiento de esos datos frente a tus clientes. Te recomendamos informarles que sus datos están almacenados en tu CRM.',
           },
           {
             title: '4. Compartición de datos',

@@ -1,7 +1,7 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import EventsView from '@/components/events/EventsView'
 
-export const metadata: Metadata = { title: 'Eventos — Artista CRM' }
+export const metadata: Metadata = { title: 'Eventos — R-TIST' }
 
 export default function EventsPage() {
   return (

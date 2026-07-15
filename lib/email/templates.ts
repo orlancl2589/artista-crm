@@ -1,4 +1,4 @@
-// Plantillas HTML para emails transaccionales de Artista CRM
+// Plantillas HTML para emails transaccionales de R-TIST
 
 const base = (content: string) => `
 <!DOCTYPE html>
@@ -34,13 +34,13 @@ const base = (content: string) => `
       <div class="header">
         <div class="logo">🎵</div>
         <div>
-          <div class="logo-text">Artista CRM</div>
+          <div class="logo-text">R-TIST</div>
           <div class="logo-sub">Notificación automática</div>
         </div>
       </div>
       ${content}
       <div class="footer">
-        <p>Artista CRM · Este email fue generado automáticamente · No respondas a este correo</p>
+        <p>R-TIST · Este email fue generado automáticamente · No respondas a este correo</p>
       </div>
     </div>
   </div>

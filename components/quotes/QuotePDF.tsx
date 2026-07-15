@@ -216,7 +216,7 @@ export default function QuotePDF({
 
         {/* Footer */}
         <View style={s.footer} fixed>
-          <Text style={s.footerText}>Artista CRM · Cotización generada digitalmente</Text>
+          <Text style={s.footerText}>R-TIST · Cotización generada digitalmente</Text>
           <Text style={s.footerText}>{quoteNumber}</Text>
         </View>
 

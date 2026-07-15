@@ -1,7 +1,7 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import ClientList from '@/components/clients/ClientList'
 
-export const metadata: Metadata = { title: 'Clientes — Artista CRM' }
+export const metadata: Metadata = { title: 'Clientes — R-TIST' }
 
 export default function ClientsPage() {
   return (

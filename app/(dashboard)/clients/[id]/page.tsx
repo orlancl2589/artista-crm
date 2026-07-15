@@ -12,7 +12,7 @@ interface Props {
   params: { id: string }
 }
 
-export const metadata: Metadata = { title: 'Cliente — Artista CRM' }
+export const metadata: Metadata = { title: 'Cliente — R-TIST' }
 
 export default async function ClientDetailPage({ params }: Props) {
   const supabase = createServerComponentClient({ cookies })
