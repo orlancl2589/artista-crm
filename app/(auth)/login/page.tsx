@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
@@ -34,15 +35,12 @@ export default function LoginPage() {
     <div className="w-full max-w-[400px]">
       {/* Logo */}
       <div className="flex items-center gap-3 mb-8">
-        <div
-          style={{ background: 'var(--accent)' }}
-          className="w-9 h-9 rounded-[8px] flex items-center justify-center text-bg font-bold text-lg"
-        >
-          🎵
+        <div className="w-[44px] h-[34px] rounded-[8px] overflow-hidden flex-shrink-0">
+          <Image src="/Logo.png" alt="R-TIST" width={44} height={34} className="w-full h-full object-contain" />
         </div>
         <div>
           <div className="font-bold text-[15px] leading-tight" style={{ color: 'var(--text)' }}>
-            Artista CRM
+            R-TIST
           </div>
           <div
             className="font-mono text-[10px] tracking-wide"
