@@ -95,7 +95,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         style={{ borderBottom: '1px solid var(--border)' }}
       >
         <div className="w-[34px] h-[34px] rounded-[8px] overflow-hidden flex-shrink-0">
-          <Image src="/Logo.jpeg" alt="Logo" width={34} height={34} className="w-full h-full object-cover" />
+          <Image src="/Logo.png" alt="Logo" width={34} height={34} className="w-full h-full object-cover" />
         </div>
         <div className="flex-1">
           <div className="text-[15px] font-extrabold tracking-[-0.3px] leading-tight" style={{ color: 'var(--text)' }}>
