@@ -24,11 +24,6 @@ export const metadata: Metadata = {
   description:
     'Plataforma SaaS para DJs, bandas y artistas. Gestiona clientes, eventos y mensajes con agente IA.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
-  icons: {
-    icon: '/faviconRT.png',
-    shortcut: '/faviconRT.png',
-    apple: '/faviconRT.png',
-  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
