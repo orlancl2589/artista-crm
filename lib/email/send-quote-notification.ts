@@ -12,7 +12,7 @@ interface QuoteNotificationParams {
   newStatus: string
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://artista-crm-production.up.railway.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://r-tist.vercel.app'
 
 const SUBJECT: Record<string, string> = {
   sent:     'Cotización enviada',
@@ -37,7 +37,7 @@ export async function sendQuoteNotification(params: QuoteNotificationParams) {
     await resend.emails.send({
       from: FROM,
       to: [toEmail],
-      subject: `${subject} — Artista CRM`,
+      subject: `${subject} — R-TIST`,
       html,
     })
   } catch (err) {
