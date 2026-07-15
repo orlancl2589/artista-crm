@@ -4,6 +4,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+interface SidebarProps {
+  onClose?: () => void
+  artistName: string
+  artistLogoUrl: string | null
+}
+
 const NAV_MAIN = [
   { href: '/', icon: '⚡', label: 'Dashboard' },
   { href: '/messages', icon: '💬', label: 'Mensajes', badge: '7', badgeVariant: 'red' as const },
@@ -83,7 +89,7 @@ function NavItem({
   )
 }
 
-export default function Sidebar({ onClose }: { onClose?: () => void }) {
+export default function Sidebar({ onClose, artistName, artistLogoUrl }: SidebarProps) {
   return (
     <aside
       className="w-[220px] min-w-[220px] h-full flex flex-col relative z-10"
@@ -165,15 +171,17 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
           onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg4)')}
           onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--bg3)')}
         >
-          <div
-            className="w-7 h-7 rounded-full flex items-center justify-center text-[12px] flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, var(--purple), var(--blue))' }}
+          <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
+            style={{ background: artistLogoUrl ? 'transparent' : 'linear-gradient(135deg, var(--purple), var(--blue))' }}
           >
-            🎧
+            {artistLogoUrl
+              ? <Image src={artistLogoUrl} alt={artistName} width={28} height={28} className="w-full h-full object-cover" />
+              : <span className="text-[12px]">🎧</span>
+            }
           </div>
           <div>
-            <div className="text-[12px] font-semibold leading-tight" style={{ color: 'var(--text)' }}>
-              Mi perfil
+            <div className="text-[12px] font-semibold leading-tight truncate max-w-[120px]" style={{ color: 'var(--text)' }}>
+              {artistName || 'Mi perfil'}
             </div>
             <div className="font-mono text-[10px]" style={{ color: 'var(--muted2)' }}>
               Plan Free

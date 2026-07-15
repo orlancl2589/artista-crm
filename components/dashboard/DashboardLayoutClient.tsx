@@ -1,22 +1,28 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import Sidebar from './Sidebar'
 
-export default function DashboardLayoutClient({ children }: { children: React.ReactNode }) {
+interface Props {
+  children: React.ReactNode
+  artistName: string
+  artistLogoUrl: string | null
+}
+
+export default function DashboardLayoutClient({ children, artistName, artistLogoUrl }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
-  // Cierra el sidebar al navegar en mobile
   useEffect(() => { setSidebarOpen(false) }, [pathname])
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
 
-      {/* Sidebar desktop — siempre visible en lg+ */}
+      {/* Sidebar desktop */}
       <div className="hidden lg:block flex-shrink-0">
-        <Sidebar />
+        <Sidebar artistName={artistName} artistLogoUrl={artistLogoUrl} />
       </div>
 
       {/* Sidebar mobile — overlay */}
@@ -28,7 +34,7 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
             onClick={() => setSidebarOpen(false)}
           />
           <div className="fixed inset-y-0 left-0 z-50 lg:hidden">
-            <Sidebar onClose={() => setSidebarOpen(false)} />
+            <Sidebar artistName={artistName} artistLogoUrl={artistLogoUrl} onClose={() => setSidebarOpen(false)} />
           </div>
         </>
       )}
@@ -52,14 +58,11 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
             ☰
           </button>
           <div className="flex items-center gap-2">
-            <div
-              className="w-7 h-7 rounded-[6px] flex items-center justify-center text-[13px] flex-shrink-0"
-              style={{ background: 'var(--accent)' }}
-            >
-              🎵
+            <div className="w-[36px] h-[28px] rounded-[6px] overflow-hidden flex-shrink-0">
+              <Image src="/Logo.png" alt="R-TIST" width={36} height={28} className="w-full h-full object-contain" />
             </div>
             <span className="font-extrabold text-[14px] tracking-[-0.3px]" style={{ color: 'var(--text)' }}>
-              Artista CRM
+              R-TIST
             </span>
           </div>
         </div>
