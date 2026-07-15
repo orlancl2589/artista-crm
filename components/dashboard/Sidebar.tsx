@@ -94,12 +94,12 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         className="flex items-center gap-[10px] px-5 py-[22px]"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
-        <div className="w-[34px] h-[34px] rounded-[8px] overflow-hidden flex-shrink-0">
-          <Image src="/Logo.png" alt="Logo" width={34} height={34} className="w-full h-full object-cover" />
+        <div className="w-[44px] h-[34px] rounded-[8px] overflow-hidden flex-shrink-0">
+          <Image src="/Logo.png" alt="Logo" width={44} height={34} className="w-full h-full object-contain" />
         </div>
         <div className="flex-1">
           <div className="text-[15px] font-extrabold tracking-[-0.3px] leading-tight" style={{ color: 'var(--text)' }}>
-            Artista CRM
+            R-TIST
           </div>
           <div className="font-mono text-[10px] tracking-[0.5px]" style={{ color: 'var(--muted2)' }}>
             v1.0 · beta

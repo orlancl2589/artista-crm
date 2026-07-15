@@ -18,12 +18,17 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Artista CRM',
-    default: 'Artista CRM — Gestión inteligente para artistas',
+    template: '%s | R-TIST',
+    default: 'R-TIST — Gestión inteligente para artistas',
   },
   description:
     'Plataforma SaaS para DJs, bandas y artistas. Gestiona clientes, eventos y mensajes con agente IA.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
+  icons: {
+    icon: '/faviconRT.png',
+    shortcut: '/faviconRT.png',
+    apple: '/faviconRT.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
