@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+// Image se usa para el logo del sistema (local), img nativo para el logo del artista (Supabase)
 import { usePathname } from 'next/navigation'
 
 interface SidebarProps {
@@ -175,7 +176,8 @@ export default function Sidebar({ onClose, artistName, artistLogoUrl }: SidebarP
             style={{ background: artistLogoUrl ? 'transparent' : 'linear-gradient(135deg, var(--purple), var(--blue))' }}
           >
             {artistLogoUrl
-              ? <Image src={artistLogoUrl} alt={artistName} width={28} height={28} className="w-full h-full object-cover" />
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={artistLogoUrl} alt={artistName} className="w-full h-full object-cover" />
               : <span className="text-[12px]">🎧</span>
             }
           </div>
