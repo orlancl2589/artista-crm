@@ -20,16 +20,15 @@ interface Props {
   style?: React.CSSProperties
 }
 
-let loaderPromise: Promise<typeof google> | null = null
+let loaderPromise: Promise<unknown> | null = null
 
-function getLoader() {
+function getLoaderPromise() {
   if (!loaderPromise) {
     const loader = new Loader({
       apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
       version: 'weekly',
-      libraries: ['places'],
     })
-    loaderPromise = loader.load()
+    loaderPromise = loader.importLibrary('places')
   }
   return loaderPromise
 }
@@ -40,7 +39,9 @@ export default function VenueAutocomplete({ value, onChange, onPlaceSelect, plac
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) return
-    getLoader().then(() => setReady(true)).catch(() => {})
+    getLoaderPromise()
+      .then(() => setReady(true))
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -79,23 +80,13 @@ export default function VenueAutocomplete({ value, onChange, onPlaceSelect, plac
   }, [ready, onPlaceSelect, onChange])
 
   return (
-    <div className="relative">
-      <input
-        ref={inputRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder ?? 'Escribe el nombre del lugar...'}
-        style={style}
-        autoComplete="off"
-      />
-      {!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
-        <span
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px]"
-          style={{ color: 'var(--muted)' }}
-        >
-          Maps N/D
-        </span>
-      )}
-    </div>
+    <input
+      ref={inputRef}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder ?? 'Escribe el nombre del lugar...'}
+      style={style}
+      autoComplete="off"
+    />
   )
 }
