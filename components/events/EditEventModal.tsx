@@ -69,40 +69,45 @@ export default function EditEventModal({ open, event, onClose, onUpdated }: Prop
   const [clients, setClients] = useState<Client[]>([])
   const [serverError, setServerError] = useState('')
 
+  const defaults = {
+    title: event.title,
+    eventType: event.eventType as UpdateEventInput['eventType'],
+    startDate: toLocal(event.startDate),
+    endDate: toLocal(event.endDate),
+    clientId: event.client?.id ?? '',
+    venue: event.venue ?? '',
+    venueAddress: event.venueAddress ?? '',
+    city: event.city ?? '',
+    state: event.state ?? '',
+    price: event.price ? Number(event.price) : undefined,
+    currency: event.currency,
+    internalNotes: event.internalNotes ?? '',
+  }
+
   const {
     register,
     handleSubmit,
-    reset,
     setValue,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<UpdateEventInput>({
     resolver: zodResolver(UpdateEventSchema),
+    defaultValues: defaults,
   })
 
   const watchedType = watch('eventType')
 
+  // Carga clientes y restaura la selección después de que aparezcan las opciones
   useEffect(() => {
     if (!open) return
     fetch('/api/clients?limit=100')
       .then((r) => r.json())
-      .then((j) => setClients(j.data ?? []))
+      .then((j) => {
+        setClients(j.data ?? [])
+        if (event.client?.id) setValue('clientId', event.client.id)
+      })
       .catch(() => {})
-    reset({
-      title: event.title,
-      eventType: event.eventType as UpdateEventInput['eventType'],
-      startDate: toLocal(event.startDate),
-      endDate: toLocal(event.endDate),
-      clientId: event.client?.id ?? undefined,
-      venue: event.venue ?? undefined,
-      venueAddress: event.venueAddress ?? undefined,
-      city: event.city ?? undefined,
-      state: event.state ?? undefined,
-      price: event.price ? Number(event.price) : undefined,
-      currency: event.currency,
-      internalNotes: event.internalNotes ?? undefined,
-    })
-  }, [open, event, reset])
+  }, [open, event.client?.id, setValue])
 
   const handlePlaceSelect = useCallback((place: VenuePlaceResult) => {
     setValue('venue', place.venue)
@@ -132,7 +137,7 @@ export default function EditEventModal({ open, event, onClose, onUpdated }: Prop
     }
   }
 
-  function handleClose() { reset(); setServerError(''); onClose() }
+  function handleClose() { setServerError(''); onClose() }
 
   return (
     <div
