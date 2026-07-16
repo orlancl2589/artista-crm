@@ -85,6 +85,8 @@ model Client {
   isActive         Boolean  @default(true)
 
   photoUrl         String?
+  city             String?
+  state            String?
 
   totalSpent       Decimal  @default(0) @db.Decimal(10, 2)
   totalEvents      Int      @default(0)
@@ -123,6 +125,9 @@ model Event {
   venue         String?
   venueAddress  String?
   city          String?
+  state         String?
+  venueLat      Decimal?    @db.Decimal(10, 7)
+  venueLng      Decimal?    @db.Decimal(10, 7)
 
   durationHours Decimal?    @db.Decimal(4, 2)
   price         Decimal?    @db.Decimal(10, 2)
@@ -169,6 +174,9 @@ model Quote {
   eventEndDate   DateTime?  // fecha de fin (eventos de varios días)
   eventStartTime String?    // "18:00"
   eventEndTime   String?    // "23:00"
+
+  eventCity      String?
+  eventState     String?
 
   validUntil     DateTime?
   notes          String?

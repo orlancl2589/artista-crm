@@ -42,6 +42,8 @@ export default async function EventDetailPage({ params }: Props) {
     endDate: event.endDate.toISOString(),
     price: event.price?.toString() ?? null,
     paidAmount: event.paidAmount.toString(),
+    venueLat: event.venueLat?.toString() ?? null,
+    venueLng: event.venueLng?.toString() ?? null,
     quotes: event.quotes.map((q) => ({ ...q, total: q.total.toString() })),
   }
 

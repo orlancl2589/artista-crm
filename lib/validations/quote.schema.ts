@@ -47,6 +47,8 @@ export const CreateQuoteSchema = z.object({
   lineItems: z.array(LineItemSchema).min(1, 'Agrega al menos un concepto'),
   tax: z.number().nonnegative().default(0),
   currency: z.string().length(3).default('MXN'),
+  eventCity: z.string().max(100).optional(),
+  eventState: z.string().max(100).optional(),
   validUntil: optionalDatetime,
   notes: z.string().max(1000).optional(),
 })

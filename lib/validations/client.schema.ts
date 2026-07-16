@@ -9,6 +9,8 @@ export const CreateClientSchema = z.object({
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   birthdate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
   preferredChannel: z.enum(['whatsapp', 'instagram', 'facebook']).default('whatsapp'),
+  city: z.string().max(100).optional(),
+  state: z.string().max(100).optional(),
   tags: z.array(z.string().max(30)).max(10).default([]),
   notes: z.string().max(500).optional(),
 })

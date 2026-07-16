@@ -191,6 +191,26 @@ export default function QuoteBuilder() {
           </div>
         </div>
 
+        {/* Lugar del evento */}
+        <div
+          className="rounded-xl p-5 flex flex-col gap-4"
+          style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}
+        >
+          <h2 className="text-[12px] font-bold uppercase tracking-[0.8px]" style={{ color: 'var(--muted)' }}>
+            Lugar del evento
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-medium" style={{ color: 'var(--muted2)' }}>Ciudad</label>
+              <input {...register('eventCity')} placeholder="CDMX" style={inputStyle} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-medium" style={{ color: 'var(--muted2)' }}>Estado</label>
+              <input {...register('eventState')} placeholder="Ciudad de México" style={inputStyle} />
+            </div>
+          </div>
+        </div>
+
         {/* Conceptos */}
         <div
           className="rounded-xl p-5 flex flex-col gap-4"

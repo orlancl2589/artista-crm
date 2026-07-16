@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CreateEventSchema, type CreateEventInput } from '@/lib/validations/event.schema'
+import VenueAutocomplete, { type VenuePlaceResult } from '@/components/shared/VenueAutocomplete'
 
 interface Client {
   id: string
@@ -67,10 +68,13 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
   const [clients, setClients] = useState<Client[]>([])
   const [serverError, setServerError] = useState('')
 
+  const [venueValue, setVenueValue] = useState('')
+
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateEventInput>({
     resolver: zodResolver(CreateEventSchema),
@@ -113,8 +117,19 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
     }
   }
 
+  const handlePlaceSelect = useCallback((place: VenuePlaceResult) => {
+    setValue('venue', place.venue)
+    setValue('venueAddress', place.venueAddress)
+    setValue('city', place.city)
+    setValue('state', place.state)
+    setValue('venueLat', place.venueLat)
+    setValue('venueLng', place.venueLng)
+    setVenueValue(place.venue)
+  }, [setValue])
+
   function handleClose() {
     reset()
+    setVenueValue('')
     setServerError('')
     onClose()
   }
@@ -209,13 +224,24 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
             </select>
           </Field>
 
-          {/* Venue */}
+          {/* Venue con Google Maps Autocomplete */}
+          <Field label="Venue / Lugar" error={errors.venue?.message}>
+            <VenueAutocomplete
+              value={venueValue}
+              onChange={setVenueValue}
+              onPlaceSelect={handlePlaceSelect}
+              placeholder="Escribe el nombre del salón o venue..."
+              style={inputStyle}
+            />
+          </Field>
+
+          {/* Ciudad / Estado (auto-llenado por Maps, editable manualmente) */}
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Venue / Lugar">
-              <input {...register('venue')} placeholder="Salón Los Pinos" style={inputStyle} />
-            </Field>
             <Field label="Ciudad">
               <input {...register('city')} placeholder="CDMX" style={inputStyle} />
+            </Field>
+            <Field label="Estado">
+              <input {...register('state')} placeholder="Ciudad de México" style={inputStyle} />
             </Field>
           </div>
 

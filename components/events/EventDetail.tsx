@@ -23,6 +23,9 @@ interface Event {
   venue: string | null
   venueAddress: string | null
   city: string | null
+  state: string | null
+  venueLat: string | null
+  venueLng: string | null
   price: string | null
   paidAmount: string
   currency: string
@@ -229,7 +232,25 @@ export default function EventDetail({ event: initial }: { event: Event }) {
             <InfoRow label="Fin" value={formatDT(event.endDate, event.timezone)} />
             {event.venue && <InfoRow label="Venue" value={event.venue} />}
             {event.venueAddress && <InfoRow label="Dirección" value={event.venueAddress} />}
-            {event.city && <InfoRow label="Ciudad" value={event.city} />}
+            {(event.city || event.state) && (
+              <InfoRow label="Ubicación" value={[event.city, event.state].filter(Boolean).join(', ')} />
+            )}
+            {(event.venueLat && event.venueLng) && (
+              <InfoRow
+                label="Mapa"
+                value={
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${event.venueLat},${event.venueLng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[13px] font-semibold"
+                    style={{ color: 'var(--accent)' }}
+                  >
+                    📍 Cómo llegar
+                  </a>
+                }
+              />
+            )}
             {event.client && (
               <InfoRow
                 label="Cliente"

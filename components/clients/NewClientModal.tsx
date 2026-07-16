@@ -152,6 +152,32 @@ export default function NewClientModal({ open, onClose, onCreated }: Props) {
             )}
           </div>
 
+          {/* Ciudad / Estado */}
+          <div className="flex gap-3">
+            <div className="flex-1 flex flex-col gap-1">
+              <label className="text-[12px] font-medium" style={{ color: 'var(--muted2)' }}>
+                Ciudad
+              </label>
+              <input
+                {...register('city')}
+                placeholder="CDMX"
+                className="w-full px-3 py-[9px] rounded-[var(--radius)] text-[14px] outline-none transition-colors"
+                style={{ background: 'var(--bg3)', border: '1px solid var(--border)', color: 'var(--text)' }}
+              />
+            </div>
+            <div className="flex-1 flex flex-col gap-1">
+              <label className="text-[12px] font-medium" style={{ color: 'var(--muted2)' }}>
+                Estado
+              </label>
+              <input
+                {...register('state')}
+                placeholder="Ciudad de México"
+                className="w-full px-3 py-[9px] rounded-[var(--radius)] text-[14px] outline-none transition-colors"
+                style={{ background: 'var(--bg3)', border: '1px solid var(--border)', color: 'var(--text)' }}
+              />
+            </div>
+          </div>
+
           {/* Canal preferido */}
           <div className="flex flex-col gap-1">
             <label className="text-[12px] font-medium" style={{ color: 'var(--muted2)' }}>
