@@ -101,6 +101,7 @@ export default function QuotePDF({
         <View style={s.header}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {artistLogoUrl
+              // eslint-disable-next-line jsx-a11y/alt-text
               ? <Image src={artistLogoUrl} style={{ width: 48, height: 48, objectFit: 'contain', marginRight: 10 }} />
               : (
                 <View style={s.logoBox}>

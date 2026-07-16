@@ -94,6 +94,16 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
       .catch(() => {})
   }, [open])
 
+  const handlePlaceSelect = useCallback((place: VenuePlaceResult) => {
+    setValue('venue', place.venue)
+    setValue('venueAddress', place.venueAddress)
+    setValue('city', place.city)
+    setValue('state', place.state)
+    setValue('venueLat', place.venueLat)
+    setValue('venueLng', place.venueLng)
+    setVenueValue(place.venue)
+  }, [setValue])
+
   if (!open) return null
 
   async function onSubmit(data: CreateEventInput) {
@@ -116,16 +126,6 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
       setServerError('Error de conexión')
     }
   }
-
-  const handlePlaceSelect = useCallback((place: VenuePlaceResult) => {
-    setValue('venue', place.venue)
-    setValue('venueAddress', place.venueAddress)
-    setValue('city', place.city)
-    setValue('state', place.state)
-    setValue('venueLat', place.venueLat)
-    setValue('venueLng', place.venueLng)
-    setVenueValue(place.venue)
-  }, [setValue])
 
   function handleClose() {
     reset()
