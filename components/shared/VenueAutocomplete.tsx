@@ -82,7 +82,7 @@ export default function VenueAutocomplete({ onPlaceSelect }: Props) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       el.addEventListener('gmp-placeselect', async (e: any) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let place: any = e.place ?? e.placePrediction?.toPlace()
+        const place: any = e.place ?? e.placePrediction?.toPlace()
         if (!place) return
 
         try {
