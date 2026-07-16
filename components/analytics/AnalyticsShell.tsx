@@ -249,7 +249,7 @@ export default function AnalyticsShell({
                   )}
                 />
                 <Tooltip
-                  formatter={(value: number) => [fmt(value, currency), '']}
+                  formatter={(value) => [fmt(Number(value ?? 0), currency), '']}
                   contentStyle={{
                     background: 'var(--bg3)',
                     border: '1px solid var(--border)',
