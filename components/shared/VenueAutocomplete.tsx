@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Loader } from '@googlemaps/js-api-loader'
 
 export interface VenuePlaceResult {
   venue: string
@@ -20,17 +19,28 @@ interface Props {
   style?: React.CSSProperties
 }
 
-let loaderPromise: Promise<unknown> | null = null
+const SCRIPT_ID = 'google-maps-places-script'
+const readyCallbacks: (() => void)[] = []
+let mapsReady = false
 
-function getLoaderPromise() {
-  if (!loaderPromise) {
-    const loader = new Loader({
-      apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
-      version: 'weekly',
-    })
-    loaderPromise = loader.importLibrary('places')
+function onMapsReady(cb: () => void) {
+  if (mapsReady) { cb(); return }
+  readyCallbacks.push(cb)
+}
+
+function loadMapsScript(apiKey: string) {
+  if (document.getElementById(SCRIPT_ID)) return
+  ;(window as Window & { __gMapsInit?: () => void }).__gMapsInit = () => {
+    mapsReady = true
+    readyCallbacks.forEach((fn) => fn())
+    readyCallbacks.length = 0
   }
-  return loaderPromise
+  const s = document.createElement('script')
+  s.id = SCRIPT_ID
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=__gMapsInit`
+  s.async = true
+  s.defer = true
+  document.head.appendChild(s)
 }
 
 export default function VenueAutocomplete({ value, onChange, onPlaceSelect, placeholder, style }: Props) {
@@ -38,10 +48,16 @@ export default function VenueAutocomplete({ value, onChange, onPlaceSelect, plac
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) return
-    getLoaderPromise()
-      .then(() => setReady(true))
-      .catch(() => {})
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    if (!apiKey) return
+    onMapsReady(() => setReady(true))
+    // Si ya está cargado (otra instancia del componente lo inició antes)
+    if (typeof google !== 'undefined' && google.maps?.places) {
+      mapsReady = true
+      setReady(true)
+      return
+    }
+    loadMapsScript(apiKey)
   }, [])
 
   useEffect(() => {
