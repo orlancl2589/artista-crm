@@ -3,8 +3,8 @@ import { z } from 'zod'
 export const CreateEventSchema = z.object({
   title: z.string().min(2).max(200).trim(),
   eventType: z.enum(['wedding', 'corporate', 'birthday', 'quinceanera', 'club', 'private', 'other']),
-  startDate: z.string().datetime(),
-  endDate: z.string().datetime(),
+  startDate: z.string().min(16, 'Fecha requerida'),
+  endDate: z.string().min(16, 'Fecha requerida'),
   timezone: z.string().default('America/Mexico_City'),
   clientId: z.string().cuid().optional(),
   venue: z.string().max(200).optional(),
