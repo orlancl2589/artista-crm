@@ -73,6 +73,7 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<CreateEventInput>({
     resolver: zodResolver(CreateEventSchema),
@@ -100,6 +101,8 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
     setValue('venueLat', place.venueLat)
     setValue('venueLng', place.venueLng)
   }, [setValue])
+
+  const watchedType = watch('eventType')
 
   if (!open) return null
 
@@ -175,16 +178,24 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
           {/* Tipo */}
           <Field label="Tipo de evento *" error={errors.eventType?.message}>
             <div className="flex flex-wrap gap-2">
-              {EVENT_TYPES.map((t) => (
-                <label
-                  key={t.value}
-                  className="px-3 py-[6px] rounded-[20px] text-[12px] cursor-pointer transition-all"
-                  style={{ border: '1px solid var(--border)', color: 'var(--muted2)', background: 'var(--bg3)' }}
-                >
-                  <input {...register('eventType')} type="radio" value={t.value} className="sr-only" />
-                  {t.label}
-                </label>
-              ))}
+              {EVENT_TYPES.map((t) => {
+                const selected = watchedType === t.value
+                return (
+                  <label
+                    key={t.value}
+                    className="px-3 py-[6px] rounded-[20px] text-[12px] cursor-pointer transition-all"
+                    style={{
+                      border: `1px solid ${selected ? 'var(--accent)' : 'var(--border)'}`,
+                      color: selected ? 'var(--bg)' : 'var(--muted2)',
+                      background: selected ? 'var(--accent)' : 'var(--bg3)',
+                      fontWeight: selected ? 700 : 400,
+                    }}
+                  >
+                    <input {...register('eventType')} type="radio" value={t.value} className="sr-only" />
+                    {t.label}
+                  </label>
+                )
+              })}
             </div>
           </Field>
 
