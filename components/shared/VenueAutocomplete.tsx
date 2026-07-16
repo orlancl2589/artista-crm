@@ -15,28 +15,41 @@ interface Props {
   onPlaceSelect: (result: VenuePlaceResult) => void
 }
 
-const SCRIPT_ID = 'google-maps-places-script'
-const readyCallbacks: (() => void)[] = []
-let mapsReady = false
+const SCRIPT_ID = 'google-maps-script'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let mapsApiPromise: Promise<void> | null = null
 
-function onMapsReady(cb: () => void) {
-  if (mapsReady) { cb(); return }
-  readyCallbacks.push(cb)
-}
+function loadMapsApi(apiKey: string): Promise<void> {
+  if (mapsApiPromise) return mapsApiPromise
 
-function loadMapsScript(apiKey: string) {
-  if (document.getElementById(SCRIPT_ID)) return
-  ;(window as Window & { __gMapsInit?: () => void }).__gMapsInit = () => {
-    mapsReady = true
-    readyCallbacks.forEach((fn) => fn())
-    readyCallbacks.length = 0
-  }
-  const s = document.createElement('script')
-  s.id = SCRIPT_ID
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=__gMapsInit`
-  s.async = true
-  s.defer = true
-  document.head.appendChild(s)
+  mapsApiPromise = new Promise<void>((resolve) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (typeof google !== 'undefined' && (google.maps as any)?.importLibrary) {
+      resolve()
+      return
+    }
+
+    if (document.getElementById(SCRIPT_ID)) {
+      const poll = setInterval(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (typeof google !== 'undefined' && (google.maps as any)?.importLibrary) {
+          clearInterval(poll)
+          resolve()
+        }
+      }, 100)
+      return
+    }
+
+    // loading=async es requerido para que PlaceAutocompleteElement dispare eventos
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(window as any).__gMapsInit = resolve
+    const s = document.createElement('script')
+    s.id = SCRIPT_ID
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&callback=__gMapsInit`
+    document.head.appendChild(s)
+  })
+
+  return mapsApiPromise
 }
 
 export default function VenueAutocomplete({ onPlaceSelect }: Props) {
@@ -46,91 +59,64 @@ export default function VenueAutocomplete({ onPlaceSelect }: Props) {
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     if (!apiKey) return
-    onMapsReady(() => setReady(true))
-    if (typeof google !== 'undefined' && google.maps?.places) {
-      if (!mapsReady) { mapsReady = true }
-      setReady(true)
-      return
-    }
-    loadMapsScript(apiKey)
+    loadMapsApi(apiKey).then(() => setReady(true))
   }, [])
 
   useEffect(() => {
     if (!ready || !containerRef.current) return
-    containerRef.current.innerHTML = ''
 
-    // PlaceAutocompleteElement — API nueva requerida para cuentas post-marzo 2025
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const PlacesLib = google.maps.places as any
-    if (!PlacesLib?.PlaceAutocompleteElement) return
+    let cancelled = false
+    const container = containerRef.current
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const el: any = new PlacesLib.PlaceAutocompleteElement({ requestedLanguage: 'es-MX' })
-    el.style.cssText = 'width:100%;display:block;'
-    containerRef.current.appendChild(el)
+    async function setup() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { PlaceAutocompleteElement } = await (google.maps as any).importLibrary('places') as any
+      if (cancelled || !container) return
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    el.addEventListener('gmp-placeselect', async (e: any) => {
-      console.log('[VenueAutocomplete] gmp-placeselect fired', e)
-      console.log('[VenueAutocomplete] e.place:', e.place)
-      console.log('[VenueAutocomplete] e.placePrediction:', e.placePrediction)
-      console.log('[VenueAutocomplete] e.detail:', e.detail)
+      container.innerHTML = ''
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const el: any = new PlaceAutocompleteElement({ requestedLanguage: 'es-MX' })
+      el.style.cssText = 'width:100%;display:block;'
+      container.appendChild(el)
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let place: any
-      if (e.placePrediction) {
-        place = e.placePrediction.toPlace()
-        console.log('[VenueAutocomplete] usando placePrediction.toPlace()', place)
-      } else if (e.place) {
-        place = e.place
-        console.log('[VenueAutocomplete] usando e.place', place)
-      } else if (e.detail?.place) {
-        place = e.detail.place
-        console.log('[VenueAutocomplete] usando e.detail.place', place)
-      } else if (e.detail?.placePrediction) {
-        place = e.detail.placePrediction.toPlace()
-        console.log('[VenueAutocomplete] usando e.detail.placePrediction.toPlace()', place)
-      }
+      el.addEventListener('gmp-placeselect', async (e: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let place: any = e.place ?? e.placePrediction?.toPlace()
+        if (!place) return
 
-      if (!place) {
-        console.log('[VenueAutocomplete] place es null/undefined, retornando')
-        return
-      }
+        try {
+          await place.fetchFields({
+            fields: ['displayName', 'formattedAddress', 'location', 'addressComponents'],
+          })
+        } catch {
+          return
+        }
 
-      try {
-        console.log('[VenueAutocomplete] llamando fetchFields...')
-        await place.fetchFields({
-          fields: ['displayName', 'formattedAddress', 'location', 'addressComponents'],
+        let city = ''
+        let state = ''
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        place.addressComponents?.forEach((c: any) => {
+          if (c.types.includes('locality')) city = c.longText ?? ''
+          if (c.types.includes('administrative_area_level_1')) state = c.shortText ?? ''
         })
-        console.log('[VenueAutocomplete] fetchFields OK', {
-          displayName: place.displayName,
-          formattedAddress: place.formattedAddress,
-          location: place.location,
-          addressComponents: place.addressComponents,
-        })
-      } catch (err) {
-        console.error('[VenueAutocomplete] fetchFields ERROR:', err)
-        return
-      }
 
-      let city = ''
-      let state = ''
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      place.addressComponents?.forEach((c: any) => {
-        if (c.types.includes('locality')) city = c.longText ?? ''
-        if (c.types.includes('administrative_area_level_1')) state = c.shortText ?? ''
+        if (!cancelled) {
+          onPlaceSelect({
+            venue: place.displayName ?? '',
+            venueAddress: place.formattedAddress ?? '',
+            city,
+            state,
+            venueLat: place.location?.lat() ?? 0,
+            venueLng: place.location?.lng() ?? 0,
+          })
+        }
       })
+    }
 
-      console.log('[VenueAutocomplete] llamando onPlaceSelect', { city, state })
-      onPlaceSelect({
-        venue: place.displayName ?? '',
-        venueAddress: place.formattedAddress ?? '',
-        city,
-        state,
-        venueLat: place.location?.lat() ?? 0,
-        venueLng: place.location?.lng() ?? 0,
-      })
-    })
+    setup().catch(console.error)
+
+    return () => { cancelled = true }
   }, [ready, onPlaceSelect])
 
   if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) return null
