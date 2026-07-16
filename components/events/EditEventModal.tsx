@@ -204,14 +204,21 @@ export default function EditEventModal({ open, event, onClose, onUpdated }: Prop
             </select>
           </Field>
 
-          <Field label="Venue / Lugar">
-            <VenueAutocomplete onPlaceSelect={handlePlaceSelect} />
-            <input
-              {...register('venue')}
-              placeholder="Nombre del venue"
-              style={{ ...inputStyle, marginTop: 6 }}
-            />
+          {/* Venue */}
+          <Field label="Nombre del venue">
+            <input {...register('venue')} placeholder="Salón Versalles, Teatro X..." style={inputStyle} />
           </Field>
+
+          {/* Actualizar ubicación con Maps */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[11px] font-medium" style={{ color: 'var(--muted2)' }}>
+              Actualizar ubicación en Maps (opcional)
+            </span>
+            <VenueAutocomplete onPlaceSelect={handlePlaceSelect} />
+            <span className="text-[11px]" style={{ color: 'var(--muted)' }}>
+              Busca el venue para actualizar coordenadas, ciudad y estado automáticamente
+            </span>
+          </div>
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Ciudad">
