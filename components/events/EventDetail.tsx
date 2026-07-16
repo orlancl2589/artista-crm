@@ -235,12 +235,19 @@ export default function EventDetail({ event: initial }: { event: Event }) {
             {(event.city || event.state) && (
               <InfoRow label="Ubicación" value={[event.city, event.state].filter(Boolean).join(', ')} />
             )}
-            {(event.venueLat && event.venueLng) && (
+            {(event.venueLat && event.venueLng
+              ? `${event.venueLat},${event.venueLng}`
+              : [event.venue, event.city, event.state].filter(Boolean).join(', ')
+            ) && (
               <InfoRow
                 label="Mapa"
                 value={
                   <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${event.venueLat},${event.venueLng}`}
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${
+                      event.venueLat && event.venueLng
+                        ? `${event.venueLat},${event.venueLng}`
+                        : encodeURIComponent([event.venue, event.city, event.state].filter(Boolean).join(', '))
+                    }`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-[13px] font-semibold"
