@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/utils/currency'
+import EditEventModal from './EditEventModal'
 
 interface Quote {
   id: string
@@ -83,6 +84,7 @@ export default function EventDetail({ event: initial }: { event: Event }) {
   const [event, setEvent] = useState(initial)
   const [deleting, setDeleting] = useState(false)
   const [updatingStatus, setUpdatingStatus] = useState(false)
+  const [editing, setEditing] = useState(false)
 
   const paid = Number(event.paidAmount)
   const price = Number(event.price ?? 0)
@@ -153,7 +155,14 @@ export default function EventDetail({ event: initial }: { event: Event }) {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+            <button
+              onClick={() => setEditing(true)}
+              className="px-3 py-[7px] rounded-[var(--radius)] text-[12px] font-medium transition-colors"
+              style={{ background: 'var(--bg3)', color: 'var(--muted2)', border: '1px solid var(--border)' }}
+            >
+              Editar
+            </button>
             {transitions.map((t) => (
               <button
                 key={t.next}
@@ -345,6 +354,16 @@ export default function EventDetail({ event: initial }: { event: Event }) {
           )}
         </div>
       </div>
+
+      <EditEventModal
+        open={editing}
+        event={event}
+        onClose={() => setEditing(false)}
+        onUpdated={(updated) => {
+          setEvent((prev) => ({ ...prev, ...updated }))
+          router.refresh()
+        }}
+      />
     </div>
   )
 }
