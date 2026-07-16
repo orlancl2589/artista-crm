@@ -27,6 +27,9 @@ export default function LoginPage() {
       return
     }
 
+    // Revocar todas las sesiones anteriores — single-session enforcement
+    await fetch('/api/auth/revoke-other-sessions', { method: 'POST' }).catch(() => {})
+
     router.push('/')
     router.refresh()
   }
