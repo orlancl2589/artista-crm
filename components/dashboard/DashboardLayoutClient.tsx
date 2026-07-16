@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Sidebar from './Sidebar'
 
 interface Props {
@@ -15,8 +16,21 @@ interface Props {
 export default function DashboardLayoutClient({ children, artistName, artistLogoUrl, artistPlan }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => { setSidebarOpen(false) }, [pathname])
+
+  // Detecta cierre de sesión (por token inválido, otro dispositivo, etc.)
+  // y redirige a login sin que la página se cuelgue
+  useEffect(() => {
+    const supabase = createClientComponentClient()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        router.push('/login')
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [router])
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
