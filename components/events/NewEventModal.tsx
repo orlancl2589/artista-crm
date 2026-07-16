@@ -67,6 +67,7 @@ const inputStyle: React.CSSProperties = {
 export default function NewEventModal({ open, onClose, onCreated, defaultClientId, initialDate }: Props) {
   const [clients, setClients] = useState<Client[]>([])
   const [serverError, setServerError] = useState('')
+  const [placeData, setPlaceData] = useState<VenuePlaceResult | null>(null)
 
   const {
     register,
@@ -94,12 +95,10 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
   }, [open])
 
   const handlePlaceSelect = useCallback((place: VenuePlaceResult) => {
+    setPlaceData(place)
     setValue('venue', place.venue)
-    setValue('venueAddress', place.venueAddress)
     setValue('city', place.city)
     setValue('state', place.state)
-    setValue('venueLat', place.venueLat)
-    setValue('venueLng', place.venueLng)
   }, [setValue])
 
   const watchedType = watch('eventType')
@@ -109,10 +108,19 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
   async function onSubmit(data: CreateEventInput) {
     setServerError('')
     try {
+      // Las coordenadas van por estado (no por el form) para evitar NaN en hidden inputs
+      const body = {
+        ...data,
+        ...(placeData && {
+          venueAddress: placeData.venueAddress,
+          venueLat: placeData.venueLat,
+          venueLng: placeData.venueLng,
+        }),
+      }
       const res = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(body),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -129,6 +137,7 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
 
   function handleClose() {
     reset()
+    setPlaceData(null)
     setServerError('')
     onClose()
   }
@@ -231,15 +240,23 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
             </select>
           </Field>
 
-          {/* Venue con Google Maps Autocomplete */}
+          {/* Venue */}
           <Field label="Venue / Lugar" error={errors.venue?.message}>
             <VenueAutocomplete onPlaceSelect={handlePlaceSelect} />
+            {placeData && (
+              <div className="flex items-center gap-1.5 mt-1 text-[11px]" style={{ color: '#22c55e' }}>
+                <span>📍</span>
+                <span>{placeData.venueAddress || `${placeData.city}, ${placeData.state}`}</span>
+              </div>
+            )}
           </Field>
-          {/* Campos ocultos registrados para que RHF los incluya en el submit */}
-          <input type="hidden" {...register('venue')} />
-          <input type="hidden" {...register('venueAddress')} />
-          <input type="hidden" {...register('venueLat', { valueAsNumber: true })} />
-          <input type="hidden" {...register('venueLng', { valueAsNumber: true })} />
+          <Field label="Nombre del venue">
+            <input
+              {...register('venue')}
+              placeholder="Salón Versalles, Hacienda X..."
+              style={inputStyle}
+            />
+          </Field>
 
           {/* Ciudad / Estado (auto-llenado por Maps, editable manualmente) */}
           <div className="grid grid-cols-2 gap-3">

@@ -70,23 +70,7 @@ function toLocal(iso: string) {
 export default function EditEventModal({ open, event, onClose, onUpdated }: Props) {
   const [clients, setClients] = useState<Client[]>([])
   const [serverError, setServerError] = useState('')
-
-  const defaults = {
-    title: event.title,
-    eventType: event.eventType as UpdateEventInput['eventType'],
-    startDate: toLocal(event.startDate),
-    endDate: toLocal(event.endDate),
-    clientId: event.client?.id ?? '',
-    venue: event.venue ?? '',
-    venueAddress: event.venueAddress ?? '',
-    city: event.city ?? '',
-    state: event.state ?? '',
-    venueLat: event.venueLat ? Number(event.venueLat) : undefined,
-    venueLng: event.venueLng ? Number(event.venueLng) : undefined,
-    price: event.price ? Number(event.price) : undefined,
-    currency: event.currency,
-    internalNotes: event.internalNotes ?? '',
-  }
+  const [placeData, setPlaceData] = useState<VenuePlaceResult | null>(null)
 
   const {
     register,
@@ -96,12 +80,23 @@ export default function EditEventModal({ open, event, onClose, onUpdated }: Prop
     formState: { errors, isSubmitting },
   } = useForm<UpdateEventInput>({
     resolver: zodResolver(UpdateEventSchema),
-    defaultValues: defaults,
+    defaultValues: {
+      title: event.title,
+      eventType: event.eventType as UpdateEventInput['eventType'],
+      startDate: toLocal(event.startDate),
+      endDate: toLocal(event.endDate),
+      clientId: event.client?.id ?? '',
+      venue: event.venue ?? '',
+      city: event.city ?? '',
+      state: event.state ?? '',
+      price: event.price ? Number(event.price) : undefined,
+      currency: event.currency,
+      internalNotes: event.internalNotes ?? '',
+    },
   })
 
   const watchedType = watch('eventType')
 
-  // Carga clientes y restaura la selección después de que aparezcan las opciones
   useEffect(() => {
     if (!open) return
     fetch('/api/clients?limit=100')
@@ -114,12 +109,10 @@ export default function EditEventModal({ open, event, onClose, onUpdated }: Prop
   }, [open, event.client?.id, setValue])
 
   const handlePlaceSelect = useCallback((place: VenuePlaceResult) => {
+    setPlaceData(place)
     setValue('venue', place.venue)
-    setValue('venueAddress', place.venueAddress)
     setValue('city', place.city)
     setValue('state', place.state)
-    setValue('venueLat', place.venueLat)
-    setValue('venueLng', place.venueLng)
   }, [setValue])
 
   if (!open) return null
@@ -127,10 +120,19 @@ export default function EditEventModal({ open, event, onClose, onUpdated }: Prop
   async function onSubmit(data: UpdateEventInput) {
     setServerError('')
     try {
+      // Coordenadas fuera del form para evitar NaN en hidden inputs
+      const body = {
+        ...data,
+        ...(placeData && {
+          venueAddress: placeData.venueAddress,
+          venueLat: placeData.venueLat,
+          venueLng: placeData.venueLng,
+        }),
+      }
       const res = await fetch(`/api/events/${event.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(body),
       })
       const json = await res.json()
       if (!res.ok) { setServerError(json.error ?? 'Error al guardar'); return }
@@ -141,7 +143,7 @@ export default function EditEventModal({ open, event, onClose, onUpdated }: Prop
     }
   }
 
-  function handleClose() { setServerError(''); onClose() }
+  function handleClose() { setPlaceData(null); setServerError(''); onClose() }
 
   return (
     <div
@@ -219,9 +221,16 @@ export default function EditEventModal({ open, event, onClose, onUpdated }: Prop
               Actualizar ubicación en Maps (opcional)
             </span>
             <VenueAutocomplete onPlaceSelect={handlePlaceSelect} />
-            <span className="text-[11px]" style={{ color: 'var(--muted)' }}>
-              Busca el venue para actualizar coordenadas, ciudad y estado automáticamente
-            </span>
+            {placeData ? (
+              <div className="flex items-center gap-1.5 text-[11px]" style={{ color: '#22c55e' }}>
+                <span>📍</span>
+                <span>{placeData.venueAddress || `${placeData.city}, ${placeData.state}`}</span>
+              </div>
+            ) : (
+              <span className="text-[11px]" style={{ color: 'var(--muted)' }}>
+                Selecciona del dropdown para actualizar coordenadas, ciudad y estado
+              </span>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -232,10 +241,6 @@ export default function EditEventModal({ open, event, onClose, onUpdated }: Prop
               <input {...register('state')} style={inputStyle} />
             </Field>
           </div>
-          {/* Campos ocultos para coordenadas — registrados para que RHF los incluya en el submit */}
-          <input type="hidden" {...register('venueAddress')} />
-          <input type="hidden" {...register('venueLat', { valueAsNumber: true })} />
-          <input type="hidden" {...register('venueLng', { valueAsNumber: true })} />
 
           <div className="grid grid-cols-[1fr_auto] gap-3">
             <Field label="Precio">
