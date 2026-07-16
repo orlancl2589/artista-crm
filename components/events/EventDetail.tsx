@@ -131,8 +131,8 @@ export default function EventDetail({ event: initial }: { event: Event }) {
         className="rounded-xl p-6 flex flex-col gap-4"
         style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="flex flex-col gap-2 min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
               <span
                 className="text-[11px] px-2 py-0.5 rounded-[5px]"
@@ -155,7 +155,7 @@ export default function EventDetail({ event: initial }: { event: Event }) {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setEditing(true)}
               className="px-3 py-[7px] rounded-[var(--radius)] text-[12px] font-medium transition-colors"
@@ -227,7 +227,7 @@ export default function EventDetail({ event: initial }: { event: Event }) {
         )}
       </div>
 
-      <div className="grid grid-cols-[1fr_1fr] gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-4">
         {/* Detalles */}
         <div
           className="rounded-xl p-5 flex flex-col gap-4"

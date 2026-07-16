@@ -104,7 +104,7 @@ export default function QuoteDetail({ quote: initial, artistName, artistLogoUrl 
         className="rounded-xl p-6 flex flex-col gap-3"
         style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
               <span className="font-mono text-[22px] font-extrabold tracking-[-0.5px]" style={{ color: 'var(--text)' }}>
@@ -182,7 +182,7 @@ export default function QuoteDetail({ quote: initial, artistName, artistLogoUrl 
           </div>
 
           {/* Acciones */}
-          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+          <div className="flex items-center gap-2 flex-wrap">
             <QuotePDFButton
               quoteNumber={quote.quoteNumber}
               createdAt={quote.createdAt}
@@ -265,7 +265,7 @@ export default function QuoteDetail({ quote: initial, artistName, artistLogoUrl 
 
       {/* Conceptos */}
       <div
-        className="rounded-xl overflow-hidden"
+        className="rounded-xl overflow-x-auto"
         style={{ border: '1px solid var(--border)' }}
       >
         <div

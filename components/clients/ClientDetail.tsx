@@ -205,7 +205,7 @@ export default function ClientDetail({ client: initial }: { client: Client }) {
 
       {/* Header */}
       <div
-        className="rounded-xl p-6 flex items-start justify-between gap-4"
+        className="rounded-xl p-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
         style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}
       >
         <div className="flex items-center gap-4">
@@ -249,7 +249,7 @@ export default function ClientDetail({ client: initial }: { client: Client }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-wrap">
           {!editing && (
             <button
               onClick={startEdit}
@@ -283,7 +283,7 @@ export default function ClientDetail({ client: initial }: { client: Client }) {
       </div>
 
       {/* Stats */}
-      <div className="flex gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard
           label="Total gastado"
           value={formatCurrency(Number(client.totalSpent))}
@@ -297,7 +297,7 @@ export default function ClientDetail({ client: initial }: { client: Client }) {
         />
       </div>
 
-      <div className="grid grid-cols-[1fr_1fr] gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-4">
         {/* Info / Edit panel */}
         <div
           className="rounded-xl p-5 flex flex-col gap-4"
