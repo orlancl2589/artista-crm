@@ -71,12 +71,24 @@ export default function VenueAutocomplete({ onPlaceSelect }: Props) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     el.addEventListener('gmp-placeselect', async (e: any) => {
-      const place = e.place
+      // Places API (New) usa e.placePrediction.toPlace()
+      // Places API (legacy) usa e.place directamente
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let place: any
+      if (e.placePrediction) {
+        place = e.placePrediction.toPlace()
+      } else {
+        place = e.place
+      }
       if (!place) return
 
-      await place.fetchFields({
-        fields: ['displayName', 'formattedAddress', 'location', 'addressComponents'],
-      })
+      try {
+        await place.fetchFields({
+          fields: ['displayName', 'formattedAddress', 'location', 'addressComponents'],
+        })
+      } catch {
+        return
+      }
 
       let city = ''
       let state = ''
