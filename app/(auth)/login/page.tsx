@@ -81,12 +81,13 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="w-full rounded-[var(--radius)] px-4 py-[10px] text-[13px] outline-none transition-colors duration-150"
+              className="w-full rounded-[var(--radius)] px-4 py-[10px] outline-none transition-colors duration-150"
               style={{
                 background: 'var(--bg3)',
                 border: '1px solid var(--border2)',
                 color: 'var(--text)',
                 fontFamily: 'var(--font-syne)',
+                fontSize: '16px', // ≥16px evita zoom automático en iOS Safari
               }}
               onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--accent)')}
               onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--border2)')}
@@ -121,12 +122,13 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-[var(--radius)] px-4 py-[10px] text-[13px] outline-none transition-colors duration-150"
+              className="w-full rounded-[var(--radius)] px-4 py-[10px] outline-none transition-colors duration-150"
               style={{
                 background: 'var(--bg3)',
                 border: '1px solid var(--border2)',
                 color: 'var(--text)',
                 fontFamily: 'var(--font-syne)',
+                fontSize: '16px', // ≥16px evita zoom automático en iOS Safari
               }}
               onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--accent)')}
               onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--border2)')}

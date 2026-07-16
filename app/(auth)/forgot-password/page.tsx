@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
   const inputStyle: React.CSSProperties = {
     width: '100%', padding: '10px 12px', borderRadius: 'var(--radius)',
     background: 'var(--bg3)', border: '1px solid var(--border2)',
-    color: 'var(--text)', fontSize: '13px', outline: 'none',
+    color: 'var(--text)', fontSize: '16px', outline: 'none',
   }
 
   return (
