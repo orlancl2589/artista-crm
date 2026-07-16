@@ -12,11 +12,7 @@ export interface VenuePlaceResult {
 }
 
 interface Props {
-  value: string
-  onChange: (value: string) => void
   onPlaceSelect: (result: VenuePlaceResult) => void
-  placeholder?: string
-  style?: React.CSSProperties
 }
 
 const SCRIPT_ID = 'google-maps-places-script'
@@ -43,17 +39,16 @@ function loadMapsScript(apiKey: string) {
   document.head.appendChild(s)
 }
 
-export default function VenueAutocomplete({ value, onChange, onPlaceSelect, placeholder, style }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null)
+export default function VenueAutocomplete({ onPlaceSelect }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     if (!apiKey) return
     onMapsReady(() => setReady(true))
-    // Si ya está cargado (otra instancia del componente lo inició antes)
     if (typeof google !== 'undefined' && google.maps?.places) {
-      mapsReady = true
+      if (!mapsReady) { mapsReady = true }
       setReady(true)
       return
     }
@@ -61,48 +56,48 @@ export default function VenueAutocomplete({ value, onChange, onPlaceSelect, plac
   }, [])
 
   useEffect(() => {
-    if (!ready || !inputRef.current) return
+    if (!ready || !containerRef.current) return
+    containerRef.current.innerHTML = ''
 
-    const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
-      types: ['establishment', 'geocode'],
-      fields: ['name', 'formatted_address', 'geometry', 'address_components'],
-    })
+    // PlaceAutocompleteElement — API nueva requerida para cuentas post-marzo 2025
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const PlacesLib = google.maps.places as any
+    if (!PlacesLib?.PlaceAutocompleteElement) return
 
-    const listener = autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace()
-      if (!place.geometry?.location) return
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const el: any = new PlacesLib.PlaceAutocompleteElement({ requestedLanguage: 'es-MX' })
+    el.style.cssText = 'width:100%;display:block;'
+    containerRef.current.appendChild(el)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    el.addEventListener('gmp-placeselect', async (e: any) => {
+      const place = e.place
+      if (!place) return
+
+      await place.fetchFields({
+        fields: ['displayName', 'formattedAddress', 'location', 'addressComponents'],
+      })
 
       let city = ''
       let state = ''
-      place.address_components?.forEach((c) => {
-        if (c.types.includes('locality')) city = c.long_name
-        if (c.types.includes('administrative_area_level_1')) state = c.short_name
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      place.addressComponents?.forEach((c: any) => {
+        if (c.types.includes('locality')) city = c.longText ?? ''
+        if (c.types.includes('administrative_area_level_1')) state = c.shortText ?? ''
       })
 
-      const result: VenuePlaceResult = {
-        venue: place.name ?? '',
-        venueAddress: place.formatted_address ?? '',
+      onPlaceSelect({
+        venue: place.displayName ?? '',
+        venueAddress: place.formattedAddress ?? '',
         city,
         state,
-        venueLat: place.geometry.location.lat(),
-        venueLng: place.geometry.location.lng(),
-      }
-
-      onPlaceSelect(result)
-      onChange(place.name ?? '')
+        venueLat: place.location?.lat() ?? 0,
+        venueLng: place.location?.lng() ?? 0,
+      })
     })
+  }, [ready, onPlaceSelect])
 
-    return () => google.maps.event.removeListener(listener)
-  }, [ready, onPlaceSelect, onChange])
+  if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) return null
 
-  return (
-    <input
-      ref={inputRef}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder ?? 'Escribe el nombre del lugar...'}
-      style={style}
-      autoComplete="off"
-    />
-  )
+  return <div ref={containerRef} style={{ width: '100%', minHeight: 38 }} />
 }

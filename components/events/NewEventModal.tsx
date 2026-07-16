@@ -68,8 +68,6 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
   const [clients, setClients] = useState<Client[]>([])
   const [serverError, setServerError] = useState('')
 
-  const [venueValue, setVenueValue] = useState('')
-
   const {
     register,
     handleSubmit,
@@ -101,7 +99,6 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
     setValue('state', place.state)
     setValue('venueLat', place.venueLat)
     setValue('venueLng', place.venueLng)
-    setVenueValue(place.venue)
   }, [setValue])
 
   if (!open) return null
@@ -129,7 +126,6 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
 
   function handleClose() {
     reset()
-    setVenueValue('')
     setServerError('')
     onClose()
   }
@@ -226,13 +222,7 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
 
           {/* Venue con Google Maps Autocomplete */}
           <Field label="Venue / Lugar" error={errors.venue?.message}>
-            <VenueAutocomplete
-              value={venueValue}
-              onChange={setVenueValue}
-              onPlaceSelect={handlePlaceSelect}
-              placeholder="Escribe el nombre del salón o venue..."
-              style={inputStyle}
-            />
+            <VenueAutocomplete onPlaceSelect={handlePlaceSelect} />
           </Field>
 
           {/* Ciudad / Estado (auto-llenado por Maps, editable manualmente) */}
