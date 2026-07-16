@@ -71,22 +71,45 @@ export default function VenueAutocomplete({ onPlaceSelect }: Props) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     el.addEventListener('gmp-placeselect', async (e: any) => {
-      // Places API (New) usa e.placePrediction.toPlace()
-      // Places API (legacy) usa e.place directamente
+      console.log('[VenueAutocomplete] gmp-placeselect fired', e)
+      console.log('[VenueAutocomplete] e.place:', e.place)
+      console.log('[VenueAutocomplete] e.placePrediction:', e.placePrediction)
+      console.log('[VenueAutocomplete] e.detail:', e.detail)
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let place: any
       if (e.placePrediction) {
         place = e.placePrediction.toPlace()
-      } else {
+        console.log('[VenueAutocomplete] usando placePrediction.toPlace()', place)
+      } else if (e.place) {
         place = e.place
+        console.log('[VenueAutocomplete] usando e.place', place)
+      } else if (e.detail?.place) {
+        place = e.detail.place
+        console.log('[VenueAutocomplete] usando e.detail.place', place)
+      } else if (e.detail?.placePrediction) {
+        place = e.detail.placePrediction.toPlace()
+        console.log('[VenueAutocomplete] usando e.detail.placePrediction.toPlace()', place)
       }
-      if (!place) return
+
+      if (!place) {
+        console.log('[VenueAutocomplete] place es null/undefined, retornando')
+        return
+      }
 
       try {
+        console.log('[VenueAutocomplete] llamando fetchFields...')
         await place.fetchFields({
           fields: ['displayName', 'formattedAddress', 'location', 'addressComponents'],
         })
-      } catch {
+        console.log('[VenueAutocomplete] fetchFields OK', {
+          displayName: place.displayName,
+          formattedAddress: place.formattedAddress,
+          location: place.location,
+          addressComponents: place.addressComponents,
+        })
+      } catch (err) {
+        console.error('[VenueAutocomplete] fetchFields ERROR:', err)
         return
       }
 
@@ -98,6 +121,7 @@ export default function VenueAutocomplete({ onPlaceSelect }: Props) {
         if (c.types.includes('administrative_area_level_1')) state = c.shortText ?? ''
       })
 
+      console.log('[VenueAutocomplete] llamando onPlaceSelect', { city, state })
       onPlaceSelect({
         venue: place.displayName ?? '',
         venueAddress: place.formattedAddress ?? '',
