@@ -235,6 +235,11 @@ export default function NewEventModal({ open, onClose, onCreated, defaultClientI
           <Field label="Venue / Lugar" error={errors.venue?.message}>
             <VenueAutocomplete onPlaceSelect={handlePlaceSelect} />
           </Field>
+          {/* Campos ocultos registrados para que RHF los incluya en el submit */}
+          <input type="hidden" {...register('venue')} />
+          <input type="hidden" {...register('venueAddress')} />
+          <input type="hidden" {...register('venueLat', { valueAsNumber: true })} />
+          <input type="hidden" {...register('venueLng', { valueAsNumber: true })} />
 
           {/* Ciudad / Estado (auto-llenado por Maps, editable manualmente) */}
           <div className="grid grid-cols-2 gap-3">

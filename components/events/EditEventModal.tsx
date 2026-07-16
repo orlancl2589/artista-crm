@@ -20,6 +20,8 @@ interface EventData {
   venueAddress: string | null
   city: string | null
   state: string | null
+  venueLat?: string | null
+  venueLng?: string | null
   price: string | null
   currency: string
   internalNotes: string | null
@@ -79,6 +81,8 @@ export default function EditEventModal({ open, event, onClose, onUpdated }: Prop
     venueAddress: event.venueAddress ?? '',
     city: event.city ?? '',
     state: event.state ?? '',
+    venueLat: event.venueLat ? Number(event.venueLat) : undefined,
+    venueLng: event.venueLng ? Number(event.venueLng) : undefined,
     price: event.price ? Number(event.price) : undefined,
     currency: event.currency,
     internalNotes: event.internalNotes ?? '',
@@ -228,6 +232,10 @@ export default function EditEventModal({ open, event, onClose, onUpdated }: Prop
               <input {...register('state')} style={inputStyle} />
             </Field>
           </div>
+          {/* Campos ocultos para coordenadas — registrados para que RHF los incluya en el submit */}
+          <input type="hidden" {...register('venueAddress')} />
+          <input type="hidden" {...register('venueLat', { valueAsNumber: true })} />
+          <input type="hidden" {...register('venueLng', { valueAsNumber: true })} />
 
           <div className="grid grid-cols-[1fr_auto] gap-3">
             <Field label="Precio">
