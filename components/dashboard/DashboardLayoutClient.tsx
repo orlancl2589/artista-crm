@@ -40,7 +40,7 @@ export default function DashboardLayoutClient({ children, artistName, artistLogo
         router.push('/login')
       }
     }
-    const interval = setInterval(poll, 20000)
+    const interval = setInterval(poll, 5000)
 
     return () => {
       mounted = false
