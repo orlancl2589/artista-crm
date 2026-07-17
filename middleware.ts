@@ -10,16 +10,15 @@ export async function middleware(req: NextRequest) {
 
   let session = null
   try {
-    const { data } = await supabase.auth.getSession()
+    const { data, error } = await supabase.auth.getSession()
+    if (error) throw error
     session = data.session
   } catch {
-    // Token refresh falló (token rotado por otro dispositivo, red, etc.)
-    // Redirigir a login limpiamente en lugar de crashear
     if (!isPublicRoute) {
       const response = NextResponse.redirect(new URL('/login', req.url))
-      // Limpiar cookies de sesión para evitar bucles
-      response.cookies.delete('sb-access-token')
-      response.cookies.delete('sb-refresh-token')
+      req.cookies.getAll().forEach(c => {
+        if (c.name.startsWith('sb-')) response.cookies.delete(c.name)
+      })
       return response
     }
     return res

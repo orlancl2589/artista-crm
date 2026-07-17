@@ -24,12 +24,29 @@ export default function DashboardLayoutClient({ children, artistName, artistLogo
   // y redirige a login sin que la página se cuelgue
   useEffect(() => {
     const supabase = createClientComponentClient()
+
+    // Listener para SIGNED_OUT inmediato
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT') router.push('/login')
+    })
+
+    // Polling cada 20s: getUser() valida en Supabase server y detecta sesión revocada
+    let mounted = true
+    const poll = async () => {
+      if (!mounted) return
+      const { error } = await supabase.auth.getUser()
+      if (error && mounted) {
+        await supabase.auth.signOut()
         router.push('/login')
       }
-    })
-    return () => subscription.unsubscribe()
+    }
+    const interval = setInterval(poll, 20000)
+
+    return () => {
+      mounted = false
+      clearInterval(interval)
+      subscription.unsubscribe()
+    }
   }, [router])
 
   return (

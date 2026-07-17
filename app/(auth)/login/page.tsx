@@ -19,7 +19,7 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data: loginData, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
       setError('Email o contraseña incorrectos.')
@@ -27,8 +27,14 @@ export default function LoginPage() {
       return
     }
 
-    // Revocar todas las sesiones anteriores — single-session enforcement
-    await fetch('/api/auth/revoke-other-sessions', { method: 'POST' }).catch(() => {})
+    // Pasar el access_token directo para no depender del timing de cookies
+    if (loginData.session?.access_token) {
+      await fetch('/api/auth/revoke-other-sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: loginData.session.access_token }),
+      }).catch(() => {})
+    }
 
     router.push('/')
     router.refresh()
