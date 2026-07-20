@@ -39,38 +39,32 @@ export async function GET() {
 
     const oauth2 = createOAuth2()
     oauth2.setCredentials({ refresh_token: refreshToken })
+    const calApi = google.calendar({ version: 'v3', auth: oauth2 })
 
-    // Try listing calendars first
+    // Test events.list directly on primary (calendar.events scope is enough for this)
+    const now = new Date()
+    const from = new Date(now.getFullYear(), now.getMonth(), 1)
+    const to = new Date(now.getFullYear(), now.getMonth() + 1, 1)
     try {
-      const calApi = google.calendar({ version: 'v3', auth: oauth2 })
-      const cals = await calApi.calendarList.list()
-      info.calendars = cals.data.items?.map(c => ({ id: c.id, summary: c.summary, primary: c.primary }))
-    } catch (err) {
-      return Response.json({ ...info, error: 'calendarList failed', detail: String(err) })
-    }
-
-    // Try listing events in primary for current month
-    try {
-      const calApi = google.calendar({ version: 'v3', auth: oauth2 })
-      const now = new Date()
-      const from = new Date(now.getFullYear(), now.getMonth(), 1)
-      const to = new Date(now.getFullYear(), now.getMonth() + 1, 1)
       const res = await calApi.events.list({
-        calendarId: artist.googleCalendarId || 'primary',
+        calendarId: 'primary',
         timeMin: from.toISOString(),
         timeMax: to.toISOString(),
         singleEvents: true,
         orderBy: 'startTime',
-        maxResults: 10,
+        maxResults: 20,
       })
+      info.eventsListOk = true
       info.eventCount = res.data.items?.length ?? 0
       info.events = res.data.items?.map(e => ({
         id: e.id,
         summary: e.summary,
         start: e.start?.dateTime ?? e.start?.date,
+        calendarId: 'primary',
       }))
     } catch (err) {
-      return Response.json({ ...info, error: 'events.list failed', detail: String(err) })
+      info.eventsListOk = false
+      info.eventsListError = String(err)
     }
 
     return Response.json(info)
