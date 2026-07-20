@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import NewClientModal from '@/components/clients/NewClientModal'
@@ -13,6 +13,13 @@ interface CalendarEvent {
   startDate: string
   status: string
   eventType: string
+}
+
+interface GCalEvent {
+  id: string
+  title: string
+  startDate: string
+  isAllDay: boolean
 }
 
 interface UpcomingEvent {
@@ -131,6 +138,15 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
   const [viewYear, setViewYear] = useState(now.getFullYear())
   const [viewMonth, setViewMonth] = useState(now.getMonth())
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
+  const [gcalEvents, setGcalEvents] = useState<GCalEvent[]>([])
+
+  useEffect(() => {
+    const month = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`
+    fetch(`/api/calendar/events?month=${month}`)
+      .then((r) => r.ok ? r.json() : { data: [] })
+      .then((d) => setGcalEvents(d.data ?? []))
+      .catch(() => {})
+  }, [viewYear, viewMonth])
 
   const year = viewYear
   const month = viewMonth
@@ -158,6 +174,16 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
     }
   })
 
+  const gcalByDay = new Map<number, GCalEvent[]>()
+  gcalEvents.forEach(e => {
+    const d = new Date(e.startDate)
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const day = d.getDate()
+      if (!gcalByDay.has(day)) gcalByDay.set(day, [])
+      gcalByDay.get(day)!.push(e)
+    }
+  })
+
   const monthName = new Date(year, month, 1).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })
   const firstDayOfMonth = new Date(year, month, 1).getDay()
   const offset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1
@@ -169,6 +195,7 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
   while (cells.length % 7 !== 0) cells.push(null)
 
   const selectedEvents = selectedDay ? (eventsByDay.get(selectedDay) ?? []) : []
+  const selectedGcal = selectedDay ? (gcalByDay.get(selectedDay) ?? []) : []
   const selectedLabel = selectedDay
     ? new Date(viewYear, viewMonth, selectedDay).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
     : null
@@ -228,7 +255,8 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
             const isToday = isCurrentMonth && day === todayDate
             const isSelected = day === selectedDay
             const dayEvents = eventsByDay.get(day) ?? []
-            const hasEvents = dayEvents.length > 0
+            const dayGcal = gcalByDay.get(day) ?? []
+            const hasEvents = dayEvents.length > 0 || dayGcal.length > 0
 
             return (
               <div
@@ -257,17 +285,14 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
                     {day}
                   </span>
                 </div>
-                {/* Status dots */}
+                {/* Status dots — R-TIST (coloreados) + Google Calendar (blancos) */}
                 {hasEvents && (
                   <div className="flex gap-[2px] mt-[2px]">
-                    {dayEvents.slice(0, 3).map((ev, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          width: 4, height: 4, borderRadius: '50%',
-                          background: isToday ? 'var(--bg)' : (CAL_STATUS_COLOR[ev.status] ?? 'var(--accent)'),
-                        }}
-                      />
+                    {dayEvents.slice(0, 2).map((ev, idx) => (
+                      <div key={`r${idx}`} style={{ width: 4, height: 4, borderRadius: '50%', background: isToday ? 'var(--bg)' : (CAL_STATUS_COLOR[ev.status] ?? 'var(--accent)') }} />
+                    ))}
+                    {dayGcal.slice(0, 2).map((_, idx) => (
+                      <div key={`g${idx}`} style={{ width: 4, height: 4, borderRadius: '50%', background: isToday ? 'var(--bg)' : '#4285f4', opacity: 0.8 }} />
                     ))}
                   </div>
                 )}
@@ -284,15 +309,15 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
             <p className="text-[11px] font-semibold capitalize" style={{ color: 'var(--text)' }}>
               {selectedLabel}
             </p>
-            {selectedEvents.length > 0 && (
+            {(selectedEvents.length + selectedGcal.length) > 0 && (
               <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
                 style={{ background: 'var(--bg3)', color: 'var(--muted2)' }}>
-                {selectedEvents.length} evento{selectedEvents.length !== 1 ? 's' : ''}
+                {selectedEvents.length + selectedGcal.length} evento{(selectedEvents.length + selectedGcal.length) !== 1 ? 's' : ''}
               </span>
             )}
           </div>
 
-          {selectedEvents.length > 0 ? (
+          {(selectedEvents.length + selectedGcal.length) > 0 ? (
             <div className="flex flex-col">
               {selectedEvents.map(ev => (
                 <div
@@ -311,6 +336,21 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
                     </p>
                   </div>
                   <span className="text-[11px]" style={{ color: 'var(--muted)' }}>→</span>
+                </div>
+              ))}
+              {selectedGcal.map(ev => (
+                <div
+                  key={ev.id}
+                  className="flex items-center gap-2.5 px-4 py-2.5"
+                  style={{ borderBottom: '1px solid var(--border)' }}
+                >
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: '#4285f4' }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold truncate" style={{ color: 'var(--text)' }}>{ev.title}</p>
+                    <p className="text-[10px]" style={{ color: 'var(--muted2)' }}>
+                      Google Calendar{ev.isAllDay ? ' · Todo el día' : ''}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>

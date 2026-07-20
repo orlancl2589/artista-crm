@@ -144,6 +144,51 @@ export async function revokeGoogleCalendar(artistId: string): Promise<void> {
   })
 }
 
+export interface GCalListEvent {
+  id: string
+  title: string
+  startDate: string // ISO string
+  isAllDay: boolean
+}
+
+export async function listGCalEvents(
+  artistId: string,
+  from: Date,
+  to: Date,
+): Promise<GCalListEvent[]> {
+  const client = await getAuthorizedClient(artistId)
+  if (!client) return []
+
+  try {
+    // Excluir eventos que ya existen en R-TIST (para no mostrarlos duplicados)
+    const synced = await prisma.event.findMany({
+      where: { artistId, googleEventId: { not: null } },
+      select: { googleEventId: true },
+    })
+    const syncedIds = new Set(synced.map((e) => e.googleEventId))
+
+    const res = await client.calendar.events.list({
+      calendarId: client.calendarId,
+      timeMin: from.toISOString(),
+      timeMax: to.toISOString(),
+      singleEvents: true,
+      orderBy: 'startTime',
+      maxResults: 250,
+    })
+
+    return (res.data.items ?? [])
+      .filter((e) => e.id && !syncedIds.has(e.id) && (e.start?.dateTime || e.start?.date))
+      .map((e) => ({
+        id: e.id!,
+        title: e.summary ?? 'Sin título',
+        startDate: e.start?.dateTime ?? e.start?.date ?? '',
+        isAllDay: !e.start?.dateTime,
+      }))
+  } catch {
+    return []
+  }
+}
+
 function buildEventBody(event: GCalEventInput) {
   const location = [event.venue, event.venueAddress].filter(Boolean).join(' — ')
   const description = [
