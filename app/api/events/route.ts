@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db/prisma'
 import { withRateLimit, rateLimiters } from '@/lib/security/rate-limit'
 import { handleApiError, ApiError } from '@/lib/utils/api-error'
 import { CreateEventSchema } from '@/lib/validations/event.schema'
+import { createGCalEvent } from '@/lib/integrations/google-calendar'
 import type { Prisma } from '@prisma/client'
 
 export async function GET(req: NextRequest) {
@@ -133,6 +134,25 @@ export async function POST(req: NextRequest) {
         data: { lastContact: new Date() },
       })
     }
+
+    // Sincronizar con Google Calendar (fire-and-forget, no bloquea la respuesta)
+    createGCalEvent(artist.id, {
+      title: event.title,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      timezone: event.timezone,
+      venue: event.venue,
+      venueAddress: event.venueAddress ?? null,
+      internalNotes: event.internalNotes,
+      clientName: event.client?.name ?? null,
+    }).then((googleEventId) => {
+      if (googleEventId) {
+        prisma.event.update({
+          where: { id: event.id },
+          data: { googleEventId },
+        }).catch(() => {})
+      }
+    }).catch(() => {})
 
     return Response.json(
       {

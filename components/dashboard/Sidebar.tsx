@@ -29,6 +29,7 @@ const NAV_GROWTH = [
 
 const NAV_CONFIG = [
   { href: '/agent', icon: '🤖', label: 'Agente IA' },
+  { href: '/settings', icon: '⚙️', label: 'Configuración' },
 ]
 
 function NavItem({

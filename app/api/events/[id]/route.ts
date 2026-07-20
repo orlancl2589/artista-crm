@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db/prisma'
 import { withRateLimit, rateLimiters } from '@/lib/security/rate-limit'
 import { handleApiError, ApiError } from '@/lib/utils/api-error'
 import { UpdateEventSchema } from '@/lib/validations/event.schema'
+import { updateGCalEvent, deleteGCalEvent } from '@/lib/integrations/google-calendar'
 
 async function getOwnedEvent(eventId: string, artistId: string) {
   const event = await prisma.event.findUnique({ where: { id: eventId } })
@@ -86,6 +87,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       include: { client: { select: { id: true, name: true } } },
     })
 
+    // Sincronizar con Google Calendar si el evento ya tenía un googleEventId
+    if (updated.googleEventId) {
+      updateGCalEvent(artist.id, updated.googleEventId, {
+        title: updated.title,
+        startDate: updated.startDate,
+        endDate: updated.endDate,
+        timezone: updated.timezone,
+        venue: updated.venue,
+        venueAddress: updated.venueAddress,
+        internalNotes: updated.internalNotes,
+        clientName: updated.client?.name ?? null,
+      }).catch(() => {})
+    }
+
     return Response.json({
       data: {
         ...updated,
@@ -106,7 +121,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     if (limited) return limited
 
     const artist = await requireArtist()
-    await getOwnedEvent(params.id, artist.id)
+    const event = await getOwnedEvent(params.id, artist.id)
+
+    // Eliminar de Google Calendar antes de borrar de DB
+    if (event.googleEventId) {
+      deleteGCalEvent(artist.id, event.googleEventId).catch(() => {})
+    }
 
     await prisma.event.delete({ where: { id: params.id } })
 
