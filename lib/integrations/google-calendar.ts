@@ -156,7 +156,13 @@ export async function listGCalEvents(
   from: Date,
   to: Date,
 ): Promise<GCalListEvent[]> {
-  const client = await getAuthorizedClient(artistId)
+  let client
+  try {
+    client = await getAuthorizedClient(artistId)
+  } catch (err) {
+    console.error('[GCal] getAuthorizedClient error:', err)
+    return []
+  }
   if (!client) return []
 
   try {
@@ -184,7 +190,8 @@ export async function listGCalEvents(
         startDate: e.start?.dateTime ?? e.start?.date ?? '',
         isAllDay: !e.start?.dateTime,
       }))
-  } catch {
+  } catch (err) {
+    console.error('[GCal] events.list error:', err)
     return []
   }
 }

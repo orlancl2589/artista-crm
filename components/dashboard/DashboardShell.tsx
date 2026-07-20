@@ -140,14 +140,18 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const [gcalEvents, setGcalEvents] = useState<GCalEvent[]>([])
   const [gcalLoading, setGcalLoading] = useState(false)
+  const [gcalConnected, setGcalConnected] = useState<boolean | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     setGcalLoading(true)
     const month = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`
     fetch(`/api/calendar/events?month=${month}`)
-      .then((r) => r.ok ? r.json() : { data: [] })
-      .then((d) => setGcalEvents(d.data ?? []))
+      .then((r) => r.ok ? r.json() : { data: [], connected: null })
+      .then((d) => {
+        setGcalEvents(d.data ?? [])
+        if (d.connected !== undefined) setGcalConnected(d.connected)
+      })
       .catch(() => {})
       .finally(() => setGcalLoading(false))
   }, [viewYear, viewMonth, refreshKey])
@@ -180,7 +184,8 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
 
   const gcalByDay = new Map<number, GCalEvent[]>()
   gcalEvents.forEach(e => {
-    const d = new Date(e.startDate)
+    // All-day events have "YYYY-MM-DD" without time — parse as local to avoid UTC offset shifting the day
+    const d = e.isAllDay ? new Date(e.startDate + 'T00:00:00') : new Date(e.startDate)
     if (d.getFullYear() === year && d.getMonth() === month) {
       const day = d.getDate()
       if (!gcalByDay.has(day)) gcalByDay.set(day, [])
@@ -210,47 +215,67 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
       style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.8px]" style={{ color: 'var(--muted)' }}>
-          Calendario
-        </h2>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={prevMonth}
-            className="w-6 h-6 flex items-center justify-center rounded-md text-[12px] transition-colors"
-            style={{ color: 'var(--muted2)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--text)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted2)' }}
-            aria-label="Mes anterior"
-          >
-            ‹
-          </button>
-          <span className="text-[11px] font-medium capitalize w-[110px] text-center" style={{ color: 'var(--muted2)' }}>
-            {monthName}
-          </span>
-          <button
-            onClick={nextMonth}
-            className="w-6 h-6 flex items-center justify-center rounded-md text-[12px] transition-colors"
-            style={{ color: 'var(--muted2)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--text)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted2)' }}
-            aria-label="Mes siguiente"
-          >
-            ›
-          </button>
-          <button
-            onClick={() => setRefreshKey(k => k + 1)}
-            disabled={gcalLoading}
-            className="w-6 h-6 flex items-center justify-center rounded-md text-[11px] transition-colors ml-1 disabled:opacity-40"
-            style={{ color: 'var(--muted2)' }}
-            onMouseEnter={e => { if (!gcalLoading) { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--text)' }}}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted2)' }}
-            aria-label="Actualizar Google Calendar"
-            title="Actualizar Google Calendar"
-          >
-            {gcalLoading ? '·' : '↻'}
-          </button>
+      <div className="flex flex-col" style={{ borderBottom: '1px solid var(--border)' }}>
+        <div className="flex items-center justify-between px-4 py-3">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.8px]" style={{ color: 'var(--muted)' }}>
+            Calendario
+          </h2>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={prevMonth}
+              className="w-6 h-6 flex items-center justify-center rounded-md text-[12px] transition-colors"
+              style={{ color: 'var(--muted2)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--text)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted2)' }}
+              aria-label="Mes anterior"
+            >
+              ‹
+            </button>
+            <span className="text-[11px] font-medium capitalize w-[110px] text-center" style={{ color: 'var(--muted2)' }}>
+              {monthName}
+            </span>
+            <button
+              onClick={nextMonth}
+              className="w-6 h-6 flex items-center justify-center rounded-md text-[12px] transition-colors"
+              style={{ color: 'var(--muted2)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--text)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted2)' }}
+              aria-label="Mes siguiente"
+            >
+              ›
+            </button>
+            <button
+              onClick={() => setRefreshKey(k => k + 1)}
+              disabled={gcalLoading}
+              className="w-6 h-6 flex items-center justify-center rounded-md text-[11px] transition-colors ml-1 disabled:opacity-40"
+              style={{ color: 'var(--muted2)' }}
+              onMouseEnter={e => { if (!gcalLoading) { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--text)' }}}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted2)' }}
+              aria-label="Actualizar Google Calendar"
+              title="Actualizar Google Calendar"
+            >
+              {gcalLoading ? '·' : '↻'}
+            </button>
+          </div>
         </div>
+        {/* GCal status bar */}
+        {gcalConnected === false && (
+          <div className="px-4 pb-2 flex items-center gap-1.5">
+            <span className="text-[9px]" style={{ color: 'var(--muted)' }}>
+              ○ Google Calendar no conectado
+            </span>
+            <a href="/settings" className="text-[9px] font-semibold hover:underline" style={{ color: '#4285f4' }}>
+              Conectar →
+            </a>
+          </div>
+        )}
+        {gcalConnected === true && gcalEvents.length === 0 && !gcalLoading && (
+          <div className="px-4 pb-2">
+            <span className="text-[9px]" style={{ color: 'var(--muted)' }}>
+              ● Google Calendar · Sin eventos este mes
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Grid */}

@@ -7,10 +7,11 @@ import { handleApiError } from '@/lib/utils/api-error'
 export async function GET(req: NextRequest) {
   try {
     const artist = await requireArtist()
+    const connected = !!artist.googleRefreshToken
 
     const month = req.nextUrl.searchParams.get('month')
     if (!month || !/^\d{4}-\d{2}$/.test(month)) {
-      return Response.json({ data: [] })
+      return Response.json({ data: [], connected })
     }
 
     const [y, m] = month.split('-').map(Number) as [number, number]
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
     const to = new Date(y, m, 1)
 
     const events = await listGCalEvents(artist.id, from, to)
-    return Response.json({ data: events })
+    return Response.json({ data: events, connected })
   } catch (err) {
     return handleApiError(err)
   }
