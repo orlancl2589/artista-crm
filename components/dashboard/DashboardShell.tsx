@@ -139,14 +139,18 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
   const [viewMonth, setViewMonth] = useState(now.getMonth())
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const [gcalEvents, setGcalEvents] = useState<GCalEvent[]>([])
+  const [gcalLoading, setGcalLoading] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
+    setGcalLoading(true)
     const month = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`
     fetch(`/api/calendar/events?month=${month}`)
       .then((r) => r.ok ? r.json() : { data: [] })
       .then((d) => setGcalEvents(d.data ?? []))
       .catch(() => {})
-  }, [viewYear, viewMonth])
+      .finally(() => setGcalLoading(false))
+  }, [viewYear, viewMonth, refreshKey])
 
   const year = viewYear
   const month = viewMonth
@@ -233,6 +237,18 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
             aria-label="Mes siguiente"
           >
             ›
+          </button>
+          <button
+            onClick={() => setRefreshKey(k => k + 1)}
+            disabled={gcalLoading}
+            className="w-6 h-6 flex items-center justify-center rounded-md text-[11px] transition-colors ml-1 disabled:opacity-40"
+            style={{ color: 'var(--muted2)' }}
+            onMouseEnter={e => { if (!gcalLoading) { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--text)' }}}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted2)' }}
+            aria-label="Actualizar Google Calendar"
+            title="Actualizar Google Calendar"
+          >
+            {gcalLoading ? '·' : '↻'}
           </button>
         </div>
       </div>
