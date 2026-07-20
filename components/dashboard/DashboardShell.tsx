@@ -127,12 +127,26 @@ const CAL_TYPE_LABEL: Record<string, string> = {
 
 function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEvent: () => void }) {
   const router = useRouter()
+  const now = new Date()
+  const [viewYear, setViewYear] = useState(now.getFullYear())
+  const [viewMonth, setViewMonth] = useState(now.getMonth())
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
 
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth()
-  const today = now.getDate()
+  const year = viewYear
+  const month = viewMonth
+  const todayDate = now.getDate()
+  const isCurrentMonth = viewYear === now.getFullYear() && viewMonth === now.getMonth()
+
+  function prevMonth() {
+    setSelectedDay(null)
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
+    else setViewMonth(m => m - 1)
+  }
+  function nextMonth() {
+    setSelectedDay(null)
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) }
+    else setViewMonth(m => m + 1)
+  }
 
   const eventsByDay = new Map<number, CalendarEvent[]>()
   events.forEach(e => {
@@ -144,7 +158,7 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
     }
   })
 
-  const monthName = now.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })
+  const monthName = new Date(year, month, 1).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })
   const firstDayOfMonth = new Date(year, month, 1).getDay()
   const offset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1
   const daysInMonth = new Date(year, month + 1, 0).getDate()
@@ -156,7 +170,7 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
 
   const selectedEvents = selectedDay ? (eventsByDay.get(selectedDay) ?? []) : []
   const selectedLabel = selectedDay
-    ? new Date(year, month, selectedDay).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
+    ? new Date(viewYear, viewMonth, selectedDay).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
     : null
 
   return (
@@ -169,9 +183,31 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
         <h2 className="text-[11px] font-bold uppercase tracking-[0.8px]" style={{ color: 'var(--muted)' }}>
           Calendario
         </h2>
-        <span className="text-[11px] font-medium capitalize" style={{ color: 'var(--muted2)' }}>
-          {monthName}
-        </span>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={prevMonth}
+            className="w-6 h-6 flex items-center justify-center rounded-md text-[12px] transition-colors"
+            style={{ color: 'var(--muted2)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--text)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted2)' }}
+            aria-label="Mes anterior"
+          >
+            ‹
+          </button>
+          <span className="text-[11px] font-medium capitalize w-[110px] text-center" style={{ color: 'var(--muted2)' }}>
+            {monthName}
+          </span>
+          <button
+            onClick={nextMonth}
+            className="w-6 h-6 flex items-center justify-center rounded-md text-[12px] transition-colors"
+            style={{ color: 'var(--muted2)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--text)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted2)' }}
+            aria-label="Mes siguiente"
+          >
+            ›
+          </button>
+        </div>
       </div>
 
       {/* Grid */}
@@ -189,7 +225,7 @@ function MiniCalendar({ events, onNewEvent }: { events: CalendarEvent[]; onNewEv
         <div className="grid grid-cols-7">
           {cells.map((day, i) => {
             if (!day) return <div key={`e${i}`} style={{ height: 36 }} />
-            const isToday = day === today
+            const isToday = isCurrentMonth && day === todayDate
             const isSelected = day === selectedDay
             const dayEvents = eventsByDay.get(day) ?? []
             const hasEvents = dayEvents.length > 0
